@@ -23,7 +23,7 @@ Route::middleware('web')->group(function () {
     Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
 });
 
-// Guest + auth: checkout and order placement
+// Guest + auth: checkout and order placement j
 Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
 Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
