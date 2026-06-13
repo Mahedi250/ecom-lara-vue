@@ -37,6 +37,13 @@ return Application::configure(basePath: dirname(__DIR__))
                     return redirect()->guest(route('admin.login'));
                 }
             }
+
+            if (in_array($response->getStatusCode(), [404, 403, 500, 503]) && !$request->expectsJson()) {
+                return \Inertia\Inertia::render('Error', ['status' => $response->getStatusCode()])
+                    ->toResponse($request)
+                    ->setStatusCode($response->getStatusCode());
+            }
+
             return $response;
         });
     })->create();
