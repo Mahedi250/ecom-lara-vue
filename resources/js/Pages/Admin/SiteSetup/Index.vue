@@ -29,6 +29,15 @@
                             <label class="label">Slide Image <span class="text-red-500">*</span></label>
                             <MediaPicker v-model="slideImageFile" :current-url="imagePreview" @select="onSlideImageSelect" />
                             <p v-if="imageError" class="error mt-1">Image is required.</p>
+                            <div class="mt-2 bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-2 space-y-1">
+                                <p class="text-[11px] font-semibold text-indigo-600 uppercase tracking-wide">Image Guidelines</p>
+                                <ul class="text-[11px] text-indigo-500 space-y-0.5">
+                                    <li>&#8226; Size: <strong>1920 × 600 px</strong> (recommended)</li>
+                                    <li>&#8226; Format: <strong>JPG</strong> at 80% quality</li>
+                                    <li>&#8226; Max file size: <strong>200 KB</strong></li>
+                                    <li>&#8226; Keep subject in <strong>center 60%</strong> — edges crop on mobile</li>
+                                </ul>
+                            </div>
                         </div>
 
                         <!-- Optional button -->
