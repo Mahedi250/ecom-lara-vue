@@ -31,19 +31,20 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(fn ($request) => $request->expectsJson());
 
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, \Illuminate\Http\Request $request) {
+            if (!$request->expectsJson()) {
+                return \Inertia\Inertia::render('Error', ['status' => $e->getStatusCode()])
+                    ->toResponse($request)
+                    ->setStatusCode($e->getStatusCode());
+            }
+        });
+
         $exceptions->respond(function (\Illuminate\Http\Response|\Symfony\Component\HttpFoundation\Response $response, \Throwable $e, \Illuminate\Http\Request $request) {
             if ($e instanceof \Illuminate\Auth\AuthenticationException) {
                 if (str_starts_with($request->path(), 'admin')) {
                     return redirect()->guest(route('admin.login'));
                 }
             }
-
-            if (in_array($response->getStatusCode(), [404, 403, 500, 503]) && !$request->expectsJson()) {
-                return \Inertia\Inertia::render('Error', ['status' => $response->getStatusCode()])
-                    ->toResponse($request)
-                    ->setStatusCode($response->getStatusCode());
-            }
-
             return $response;
         });
     })->create();
