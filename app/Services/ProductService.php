@@ -54,6 +54,15 @@ class ProductService
                 ]);
             }
 
+            foreach ($data['existing_images'] ?? [] as $index => $path) {
+                $product->images()->create([
+                    'path' => $path,
+                    'is_primary' => empty($images) && $index === 0,
+                    'sort_order' => count($images) + $index,
+                ]);
+            }
+            unset($data['existing_images']);
+
             return $product->load(['category', 'brand', 'images', 'attributeValues.attribute']);
         });
     }
