@@ -105,41 +105,24 @@
                     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
                         <h2 class="font-semibold text-gray-900 text-base">Gallery Images</h2>
 
-                        <!-- Existing images -->
-                        <div v-if="product.images?.length">
+                        <!-- Existing images with remove -->
+                        <div v-if="existingImages.length">
                             <p class="text-xs text-gray-400 mb-2">Current images</p>
                             <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                                <div v-for="img in product.images" :key="img.id"
+                                <div v-for="img in existingImages" :key="img.id"
                                     class="relative group aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-100">
                                     <img :src="img.url ?? img.image_url" class="w-full h-full object-cover" />
                                     <span v-if="img.is_primary" class="absolute top-1 left-1 bg-indigo-600 text-white text-[10px] px-1.5 py-0.5 rounded font-semibold">Main</span>
+                                    <button type="button" @click="removeExistingImage(img.id)"
+                                        class="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition">×</button>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Add more images -->
+                        <!-- Add more via media modal -->
                         <div>
                             <p class="text-xs text-gray-400 mb-2">Add more images</p>
-                            <div
-                                class="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center cursor-pointer hover:border-indigo-400 transition"
-                                @click="$refs.galleryInput.click()">
-                                <svg class="w-7 h-7 text-gray-300 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/>
-                                </svg>
-                                <p class="text-sm text-gray-400">Click to upload more images</p>
-                            </div>
-                            <input ref="galleryInput" type="file" accept="image/*" multiple class="hidden" @change="onGallery" />
-                        </div>
-
-                        <!-- New image previews -->
-                        <div v-if="galleryPreviews.length" class="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                            <div v-for="(preview, i) in galleryPreviews" :key="i"
-                                class="relative aspect-square rounded-xl overflow-hidden bg-gray-100 group border-2 border-indigo-200">
-                                <img :src="preview" class="w-full h-full object-cover" />
-                                <button type="button" @click="removeGallery(i)"
-                                    class="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition">×</button>
-                                <span class="absolute bottom-1 left-1 text-[9px] bg-indigo-600 text-white px-1 rounded">New</span>
-                            </div>
+                            <MultiMediaPicker @change="onGalleryChange" />
                         </div>
                     </div>
                 </div>
@@ -196,14 +179,16 @@ import { Link, useForm, usePage, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import ProductVariantsEditor from '@/Components/Admin/ProductVariantsEditor.vue';
 import MediaPicker from '@/Components/Admin/MediaPicker.vue';
+import MultiMediaPicker from '@/Components/Admin/MultiMediaPicker.vue';
 
 const props = defineProps({ product: Object, categories: Array, brands: Array, productTypes: Array, attributes: Array });
 const page = usePage();
 const errors = computed(() => page.props.errors ?? {});
 const thumbFile = ref(null);
 const existingThumbnail = ref(null);
-const galleryPreviews = ref([]);
-const galleryFiles = ref([]);
+const existingImages = ref([...(props.product.images ?? [])]);
+const removeImageIds = ref([]);
+const galleryPaths = ref([]);
 const variantImageFiles = ref({});
 const submitting = ref(false);
 
@@ -239,17 +224,13 @@ function onThumbMediaSelect(media) {
     else { existingThumbnail.value = null; }
 }
 
-function onGallery(e) {
-    Array.from(e.target.files).forEach(file => {
-        galleryPreviews.value.push(URL.createObjectURL(file));
-        galleryFiles.value.push(file);
-    });
-    e.target.value = '';
+function removeExistingImage(id) {
+    existingImages.value = existingImages.value.filter(img => img.id !== id);
+    removeImageIds.value.push(id);
 }
 
-function removeGallery(i) {
-    galleryPreviews.value.splice(i, 1);
-    galleryFiles.value.splice(i, 1);
+function onGalleryChange(paths) {
+    galleryPaths.value = paths;
 }
 
 function onVariantImageChange({ index, file }) {
@@ -270,7 +251,8 @@ function submit() {
     });
 
     if (existingThumbnail.value) formData.append('existing_thumbnail', existingThumbnail.value);
-    galleryFiles.value.forEach(file => formData.append('images[]', file));
+    removeImageIds.value.forEach(id => formData.append('remove_image_ids[]', id));
+    galleryPaths.value.forEach(path => formData.append('existing_images[]', path));
 
     form.variants.forEach((variant, i) => {
         Object.entries(variant).forEach(([k, v]) => {
