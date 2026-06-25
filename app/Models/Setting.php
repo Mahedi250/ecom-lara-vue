@@ -24,6 +24,7 @@ class Setting extends Model
             ['value' => $value, 'group' => $group]
         );
         Cache::forget("setting.{$key}");
+        Cache::forget("settings.group.{$group}");
     }
 
     public static function getGroup(string $group): array

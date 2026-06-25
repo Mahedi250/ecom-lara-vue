@@ -10,7 +10,7 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         $admin = User::firstOrCreate(
-            ['email' => 'admin@nityogadget.com'],
+            ['email' => 'admin@admin.com'],
             [
                 'name' => 'Super Admin',
                 'password' => bcrypt('password'),
