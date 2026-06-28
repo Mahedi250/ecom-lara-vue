@@ -80,9 +80,9 @@
                             <!-- Variant image -->
                             <div class="flex-shrink-0">
                                 <div class="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 hover:border-indigo-400 cursor-pointer transition bg-gray-50 group"
-                                    @click="triggerVariantImageInput(i)">
-                                    <img v-if="variantPreviews[i] || variant.existingImage"
-                                        :src="variantPreviews[i] || variant.existingImage"
+                                    @click="openVariantPicker(i)">
+                                    <img v-if="variantImageData[i]?.url || variant.existingImage"
+                                        :src="variantImageData[i]?.url || variant.existingImage"
                                         class="w-full h-full object-cover" />
                                     <div v-else class="w-full h-full flex flex-col items-center justify-center gap-1">
                                         <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,17 +90,14 @@
                                         </svg>
                                         <span class="text-[10px] text-gray-400">Photo</span>
                                     </div>
-                                    <!-- Edit overlay -->
                                     <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
                                         </svg>
                                     </div>
-                                    <input :ref="el => { if (el) variantImageInputs[i] = el }" type="file" accept="image/*" class="hidden"
-                                        @change="onVariantImage($event, i)" />
                                 </div>
-                                <p class="text-[10px] text-gray-400 text-center mt-1">{{ variantPreviews[i] ? 'Changed' : (variant.existingImage ? 'Click to replace' : 'Add image') }}</p>
+                                <p class="text-[10px] text-gray-400 text-center mt-1">{{ variantImageData[i] ? 'Changed' : (variant.existingImage ? 'Click to replace' : 'Add image') }}</p>
                             </div>
 
                             <!-- Main fields -->
@@ -124,7 +121,9 @@
                                     <div class="col-span-2 sm:col-span-1">
                                         <label class="block text-xs text-gray-500 mb-1">SKU</label>
                                         <input v-model="variant.sku" type="text" placeholder="VAR-001"
-                                            class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+                                            class="w-full border rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                                            :class="errors[`variants.${i}.sku`] ? 'border-red-400 bg-red-50' : 'border-gray-200'" />
+                                        <p v-if="errors[`variants.${i}.sku`]" class="text-red-500 text-[10px] mt-0.5">{{ errors[`variants.${i}.sku`] }}</p>
                                     </div>
                                     <div>
                                         <label class="block text-xs text-gray-500 mb-1">Price (৳)</label>
@@ -185,15 +184,22 @@
                 Select attributes above to define variant dimensions.
             </div>
         </template>
+
+        <!-- Shared media picker for variant images (modal teleports to body) -->
+        <div class="hidden">
+            <MediaPicker ref="variantMediaPickerRef" @select="onVariantMediaSelect" />
+        </div>
     </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue';
+import MediaPicker from '@/Components/Admin/MediaPicker.vue';
 
 const props = defineProps({
     modelValue: { type: Array, default: () => [] },
     attributes: { type: Array, default: () => [] },
+    errors: { type: Object, default: () => ({}) },
 });
 const emit = defineEmits(['update:modelValue', 'variant-image-change']);
 
@@ -211,19 +217,21 @@ watch(selectedAttrIds, (ids) => {
     });
 }, { deep: true, immediate: true });
 
-// Image previews (blob URLs) keyed by variant index
-const variantPreviews = ref({});
-const variantImageInputs = ref({});
+// Variant image state: { url, path } keyed by variant index
+const variantImageData = ref({});
+const variantMediaPickerRef = ref(null);
+const activeVariantIndex = ref(null);
 
-function triggerVariantImageInput(i) {
-    variantImageInputs.value[i]?.click();
+function openVariantPicker(i) {
+    activeVariantIndex.value = i;
+    variantMediaPickerRef.value?.open();
 }
 
-function onVariantImage(e, i) {
-    const file = e.target.files[0];
-    if (!file) return;
-    variantPreviews.value[i] = URL.createObjectURL(file);
-    emit('variant-image-change', { index: i, file });
+function onVariantMediaSelect(media) {
+    if (!media || activeVariantIndex.value === null) return;
+    const i = activeVariantIndex.value;
+    variantImageData.value = { ...variantImageData.value, [i]: { url: media.url, path: media.path } };
+    emit('variant-image-change', { index: i, path: media.path });
 }
 
 // Initialize from existing variants (edit mode)
@@ -237,7 +245,8 @@ function initFromExisting(variants) {
         stock: v.stock ?? 0,
         is_active: v.is_active ?? true,
         attributes: v.attributes_map ?? {},
-        existingImage: v.image ?? null,
+        existingImage: v.image ?? null,      // full URL for display
+        existingImagePath: v.image_path ?? null, // storage path for submission
     }));
     enabled.value = true;
 
@@ -269,7 +278,7 @@ watch(localVariants, (val) => emit('update:modelValue', val), { deep: true });
 watch(enabled, (val) => {
     if (!val) {
         localVariants.value = [];
-        variantPreviews.value = {};
+        variantImageData.value = {};
         emit('update:modelValue', []);
     }
 });
@@ -299,6 +308,9 @@ function generateCombinations() {
         .filter(a => a.values.length);
     if (!axes.length) return;
 
+    // Remove existing variants that have no attribute assignments (orphaned rows)
+    localVariants.value = localVariants.value.filter(v => Object.keys(v.attributes ?? {}).length > 0);
+
     const combos = cartesian(axes.map(a => a.values));
     const existingKeys = new Set(
         localVariants.value.map(v =>
@@ -318,13 +330,13 @@ function generateCombinations() {
 
 function removeVariant(i) {
     localVariants.value.splice(i, 1);
-    const newPreviews = {};
-    Object.entries(variantPreviews.value).forEach(([idx, url]) => {
+    const newData = {};
+    Object.entries(variantImageData.value).forEach(([idx, data]) => {
         const ni = Number(idx);
-        if (ni < i) newPreviews[ni] = url;
-        else if (ni > i) newPreviews[ni - 1] = url;
+        if (ni < i) newData[ni] = data;
+        else if (ni > i) newData[ni - 1] = data;
     });
-    variantPreviews.value = newPreviews;
+    variantImageData.value = newData;
 }
 
 function addBlankVariant() {

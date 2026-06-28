@@ -16,8 +16,12 @@
                     </div>
                     <div class="divide-y divide-gray-50">
                         <div v-for="item in order.items" :key="item.id" class="flex gap-4 px-5 py-4">
-                            <div class="w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100">
-                                <img v-if="item.product_thumbnail" :src="item.product_thumbnail" :alt="item.product_name" class="w-full h-full object-cover" />
+                            <!-- Thumbnail: prefer variant image, fallback product thumbnail -->
+                            <div class="w-14 h-14 flex-shrink-0 rounded-xl overflow-hidden bg-gray-100 border border-gray-100">
+                                <img v-if="item.variant_image || item.product_thumbnail"
+                                    :src="item.variant_image || item.product_thumbnail"
+                                    :alt="item.product_name"
+                                    class="w-full h-full object-cover" />
                                 <div v-else class="w-full h-full flex items-center justify-center text-gray-300">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                                 </div>
@@ -25,9 +29,19 @@
                             <div class="flex-1 min-w-0">
                                 <p class="font-semibold text-gray-800 text-sm">{{ item.product_name }}</p>
                                 <p class="text-xs text-gray-400 mt-0.5">SKU: {{ item.product_sku }}</p>
-                                <p class="text-xs text-gray-500 mt-0.5">{{ item.quantity }} × ৳{{ fmt(item.unit_price) }}</p>
+                                <!-- Variant attributes (RAM: 16GB, Colour: Black, etc.) -->
+                                <div v-if="item.variant_attributes?.length" class="flex flex-wrap gap-1.5 mt-1">
+                                    <span
+                                        v-for="attr in item.variant_attributes"
+                                        :key="attr.attribute"
+                                        class="inline-flex items-center gap-1 bg-indigo-50 text-indigo-700 text-xs px-2 py-0.5 rounded-full font-medium"
+                                    >
+                                        <span class="text-indigo-400">{{ attr.attribute }}:</span>{{ attr.value }}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">{{ item.quantity }} × ৳{{ fmt(item.unit_price) }}</p>
                             </div>
-                            <p class="font-bold text-gray-900 text-sm flex-shrink-0">৳{{ fmt(item.total_price) }}</p>
+                            <p class="font-bold text-gray-900 text-sm flex-shrink-0 pt-0.5">৳{{ fmt(item.total_price) }}</p>
                         </div>
                     </div>
                     <div class="border-t border-gray-100 px-5 py-4 space-y-2 text-sm">

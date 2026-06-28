@@ -17,7 +17,7 @@ class UpdateProductRequest extends FormRequest
     {
         $productId = $this->route('product')->id;
 
-        return [
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', Rule::unique('products', 'slug')->ignore($productId)],
             'sku' => ['required', 'string', Rule::unique('products', 'sku')->ignore($productId)],
@@ -41,12 +41,24 @@ class UpdateProductRequest extends FormRequest
             'meta_keywords' => ['nullable', 'string', 'max:255'],
             'attributes' => ['nullable', 'array'],
             'variants' => ['nullable', 'array'],
-            'variants.*.sku' => ['nullable', 'string', 'max:100'],
+            'variants.*.sku' => ['nullable', 'string', 'max:100', 'distinct'],
             'variants.*.price' => ['nullable', 'numeric', 'min:0'],
             'variants.*.sale_price' => ['nullable', 'numeric', 'min:0'],
             'variants.*.stock' => ['nullable', 'integer', 'min:0'],
             'variants.*.is_active' => ['nullable', 'boolean'],
             'variants.*.attributes' => ['nullable', 'array'],
         ];
+
+        // Per-index unique rule so each existing variant ignores its own SKU
+        foreach ($this->input('variants', []) as $i => $variant) {
+            $variantId = $variant['id'] ?? null;
+            $unique = Rule::unique('product_variants', 'sku');
+            if ($variantId) {
+                $unique = $unique->ignore((int) $variantId);
+            }
+            $rules["variants.{$i}.sku"][] = $unique;
+        }
+
+        return $rules;
     }
 }

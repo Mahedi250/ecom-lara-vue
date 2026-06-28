@@ -98,6 +98,7 @@
                     <ProductVariantsEditor
                         v-model="form.variants"
                         :attributes="attributes"
+                        :errors="errors"
                         @variant-image-change="onVariantImageChange"
                     />
 
@@ -189,7 +190,7 @@ const existingThumbnail = ref(null);
 const existingImages = ref([...(props.product.images ?? [])]);
 const removeImageIds = ref([]);
 const galleryPaths = ref([]);
-const variantImageFiles = ref({});
+const variantImagePaths = ref({});
 const submitting = ref(false);
 
 const form = useForm({
@@ -215,7 +216,10 @@ const form = useForm({
         sale_price: v.sale_price ?? '',
         stock: v.stock ?? 0,
         is_active: v.is_active ?? true,
-        attributes_map: v.attributes_map ?? {},
+        // Build dict from the attributes array (avoids PHP integer-key JSON array serialization bug)
+        attributes_map: Object.fromEntries((v.attributes ?? []).map(a => [a.attribute_id, a.attribute_value_id])),
+        image: v.image ?? null,       // display URL
+        image_path: v.image_path ?? null, // storage path for submission
     })),
 });
 
@@ -233,8 +237,8 @@ function onGalleryChange(paths) {
     galleryPaths.value = paths;
 }
 
-function onVariantImageChange({ index, file }) {
-    variantImageFiles.value[index] = file;
+function onVariantImageChange({ index, path }) {
+    variantImagePaths.value[index] = path;
 }
 
 function submit() {
@@ -254,19 +258,37 @@ function submit() {
     removeImageIds.value.forEach(id => formData.append('remove_image_ids[]', id));
     galleryPaths.value.forEach(path => formData.append('existing_images[]', path));
 
+    // Always signal variant state so backend knows whether to clear them
+    formData.append('_variants_sent', '1');
+
     form.variants.forEach((variant, i) => {
+        const skipKeys = ['existingImage', 'existingImagePath', 'image', 'image_path', 'attributes_map'];
         Object.entries(variant).forEach(([k, v]) => {
-            if (k === 'existingImage') return;
+            if (skipKeys.includes(k)) return;
             if (k === 'attributes') {
                 Object.entries(v ?? {}).forEach(([attrId, valueId]) => {
-                    formData.append(`variants[${i}][attributes][${attrId}]`, valueId);
+                    if (attrId && valueId) {
+                        formData.append(`variants[${i}][attributes][${attrId}]`, valueId);
+                    }
                 });
             } else if (v !== null && v !== undefined) {
                 formData.append(`variants[${i}][${k}]`, typeof v === 'boolean' ? (v ? '1' : '0') : v);
             }
         });
-        if (variantImageFiles.value[i]) {
-            formData.append(`variants[${i}][imageFile]`, variantImageFiles.value[i]);
+
+        // Fallback: if editor didn't replace form.variants, use attributes_map
+        if (!('attributes' in variant) && variant.attributes_map) {
+            Object.entries(variant.attributes_map).forEach(([attrId, valueId]) => {
+                if (attrId && valueId) {
+                    formData.append(`variants[${i}][attributes][${attrId}]`, valueId);
+                }
+            });
+        }
+
+        // New image picked via MediaPicker takes priority; otherwise preserve existing path
+        const imagePath = variantImagePaths.value[i] || variant.existingImagePath;
+        if (imagePath) {
+            formData.append(`variants[${i}][existing_image]`, imagePath);
         }
     });
 

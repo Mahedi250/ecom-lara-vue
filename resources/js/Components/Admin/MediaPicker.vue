@@ -158,6 +158,8 @@ const emit = defineEmits(['update:modelValue', 'select']);
 
 const isOpen = ref(false);
 const tab = ref('library');
+
+defineExpose({ open: openModal });
 const loading = ref(false);
 const items = ref([]);
 const search = ref('');
