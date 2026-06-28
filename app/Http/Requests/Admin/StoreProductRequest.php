@@ -39,7 +39,7 @@ class StoreProductRequest extends FormRequest
             'meta_keywords' => ['nullable', 'string', 'max:255'],
             'attributes' => ['nullable', 'array'],
             'variants' => ['nullable', 'array'],
-            'variants.*.sku' => ['nullable', 'string', 'max:100'],
+            'variants.*.sku' => ['nullable', 'string', 'max:100', 'distinct', Rule::unique('product_variants', 'sku')],
             'variants.*.price' => ['nullable', 'numeric', 'min:0'],
             'variants.*.sale_price' => ['nullable', 'numeric', 'min:0'],
             'variants.*.stock' => ['nullable', 'integer', 'min:0'],

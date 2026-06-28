@@ -35,7 +35,15 @@ class OrderController extends Controller
 
     public function show(Order $order): Response
     {
-        $order->load(['user', 'items', 'shippingAddress', 'billingAddress', 'payments']);
+        $order->load([
+            'user',
+            'items.product',
+            'items.variant.attributeValues.attribute',
+            'items.variant.attributeValues.attributeValue',
+            'shippingAddress',
+            'billingAddress',
+            'payments',
+        ]);
 
         return Inertia::render('Admin/Orders/Show', [
             'order' => fn() => (new OrderResource($order))->resolve(),

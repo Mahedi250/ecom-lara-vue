@@ -104,6 +104,7 @@
                     <ProductVariantsEditor
                         v-model="form.variants"
                         :attributes="attributes"
+                        :errors="errors"
                         @variant-image-change="onVariantImageChange"
                     />
                 </div>
@@ -168,7 +169,7 @@ const errors = computed(() => page.props.errors ?? {});
 const thumbFile = ref(null);
 const existingThumbnail = ref(null);
 const galleryPaths = ref([]);
-const variantImageFiles = ref({});
+const variantImagePaths = ref({});
 const submitting = ref(false);
 
 const form = useForm({
@@ -190,8 +191,8 @@ function onGalleryChange(paths) {
     galleryPaths.value = paths;
 }
 
-function onVariantImageChange({ index, file }) {
-    variantImageFiles.value[index] = file;
+function onVariantImageChange({ index, path }) {
+    variantImagePaths.value[index] = path;
 }
 
 function submit() {
@@ -219,14 +220,16 @@ function submit() {
             if (k === 'existingImage') return;
             if (k === 'attributes') {
                 Object.entries(v ?? {}).forEach(([attrId, valueId]) => {
-                    formData.append(`variants[${i}][attributes][${attrId}]`, valueId);
+                    if (attrId && valueId) {
+                        formData.append(`variants[${i}][attributes][${attrId}]`, valueId);
+                    }
                 });
             } else if (v !== null && v !== undefined) {
                 formData.append(`variants[${i}][${k}]`, typeof v === 'boolean' ? (v ? '1' : '0') : v);
             }
         });
-        if (variantImageFiles.value[i]) {
-            formData.append(`variants[${i}][imageFile]`, variantImageFiles.value[i]);
+        if (variantImagePaths.value[i]) {
+            formData.append(`variants[${i}][existing_image]`, variantImagePaths.value[i]);
         }
     });
 

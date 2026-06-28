@@ -19,6 +19,7 @@ class ProductVariantResource extends JsonResource
             'stock' => $this->stock,
             'is_active' => $this->is_active,
             'image' => $this->image ? Storage::disk('public')->url($this->image) : null,
+            'image_path' => $this->image,
             'attributes_map' => $this->whenLoaded('attributeValues', fn() =>
                 $this->attributeValues->mapWithKeys(fn($av) => [
                     (string) $av->attribute_id => $av->attribute_value_id,

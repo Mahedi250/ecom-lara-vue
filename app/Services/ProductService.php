@@ -86,9 +86,10 @@ class ProductService
                 $this->syncAttributes($product, $data['attributes']);
             }
 
-            if (isset($data['variants'])) {
-                $this->syncVariants($product, $data['variants'], $variantImages);
+            if (isset($data['_variants_sent'])) {
+                $this->syncVariants($product, $data['variants'] ?? [], $variantImages);
             }
+            unset($data['_variants_sent']);
 
             // Remove deleted images
             if (!empty($data['remove_image_ids'])) {
@@ -137,7 +138,10 @@ class ProductService
 
             if (isset($variantImages[$index]) && $variantImages[$index] instanceof UploadedFile) {
                 $data['image'] = $variantImages[$index]->store('products/variants', 'public');
+            } elseif (!empty($row['existing_image'])) {
+                $data['image'] = $row['existing_image'];
             }
+            unset($data['existing_image']);
 
             if ($id && $variant = $product->variants()->find((int) $id)) {
                 $variant->update($data);
@@ -145,13 +149,16 @@ class ProductService
                 $variant = $product->variants()->create($data);
             }
 
-            $variant->attributeValues()->delete();
-            foreach ($attrs as $attrId => $valueId) {
-                if ($valueId) {
-                    $variant->attributeValues()->create([
-                        'attribute_id'       => (int) $attrId,
-                        'attribute_value_id' => (int) $valueId,
-                    ]);
+            // Only sync attribute values when the request explicitly includes them
+            if (array_key_exists('attributes', $row)) {
+                $variant->attributeValues()->delete();
+                foreach ($attrs as $attrId => $valueId) {
+                    if ((int) $attrId > 0 && (int) $valueId > 0) {
+                        $variant->attributeValues()->create([
+                            'attribute_id'       => (int) $attrId,
+                            'attribute_value_id' => (int) $valueId,
+                        ]);
+                    }
                 }
             }
         }
