@@ -124,4 +124,11 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')
             ->with('success', 'Product deleted successfully.');
     }
+
+    public function toggleFeatured(Product $product): RedirectResponse
+    {
+        $product->update(['is_featured' => ! $product->is_featured]);
+
+        return back()->with('success', $product->is_featured ? 'Product marked as featured.' : 'Product removed from featured.');
+    }
 }
