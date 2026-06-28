@@ -38,12 +38,13 @@
                             <th class="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Price</th>
                             <th class="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Stock</th>
                             <th class="text-left px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
+                            <th class="text-center px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide hidden sm:table-cell">Featured</th>
                             <th class="px-4 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wide text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
                         <tr v-if="products.data.length === 0">
-                            <td colspan="6" class="px-5 py-12 text-center text-gray-400">No products found</td>
+                            <td colspan="7" class="px-5 py-12 text-center text-gray-400">No products found</td>
                         </tr>
                         <tr v-for="p in products.data" :key="p.id" class="hover:bg-gray-50/50 transition">
                             <td class="px-5 py-3.5">
@@ -76,6 +77,20 @@
                                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full" :class="p.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'">
                                     {{ p.status_label }}
                                 </span>
+                            </td>
+                            <td class="px-4 py-3.5 text-center hidden sm:table-cell">
+                                <button
+                                    @click="toggleFeatured(p)"
+                                    :disabled="togglingId === p.id"
+                                    :title="p.is_featured ? 'Remove from featured' : 'Mark as featured'"
+                                    class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-50"
+                                    :class="p.is_featured ? 'bg-amber-400' : 'bg-gray-200'"
+                                >
+                                    <span
+                                        class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition duration-200"
+                                        :class="p.is_featured ? 'translate-x-4' : 'translate-x-0'"
+                                    />
+                                </button>
                             </td>
                             <td class="px-4 py-3.5 text-right">
                                 <div class="flex items-center gap-2 justify-end">
@@ -135,6 +150,7 @@ const props = defineProps({
 const page = usePage();
 const filters = reactive({ search: props.filters?.search ?? '', category_id: props.filters?.category_id ?? '', status: props.filters?.status ?? '' });
 const deleteTarget = ref(null);
+const togglingId = ref(null);
 const hasFilters = computed(() => filters.search || filters.category_id || filters.status);
 
 function fmt(v) { return Number(v).toLocaleString('en-BD'); }
@@ -144,6 +160,13 @@ function confirmDelete(p) { deleteTarget.value = p; }
 function doDelete() {
     router.delete(route('admin.products.destroy', deleteTarget.value.id), {
         onSuccess: () => { deleteTarget.value = null; },
+    });
+}
+function toggleFeatured(p) {
+    togglingId.value = p.id;
+    router.patch(route('admin.products.toggle-featured', p.id), {}, {
+        preserveScroll: true,
+        onFinish: () => { togglingId.value = null; },
     });
 }
 </script>
