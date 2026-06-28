@@ -229,18 +229,25 @@ const loading = ref(false);
 const updatingId = ref(null);
 const removingId = ref(null);
 
-const freeShippingThreshold = 2000;
-const shippingRate = 120;
+const shippingSettings = computed(() => page.props.shipping_settings ?? { default_cost: 120, free_threshold: 2000 });
+const freeShippingThreshold = computed(() => shippingSettings.value.free_threshold);
+const shippingRate = computed(() => shippingSettings.value.default_cost);
 
 const subtotal = computed(() => {
     if (!cart.value?.items) return 0;
     return cart.value.items.reduce((sum, item) => sum + item.subtotal, 0);
 });
 
-const shipping = computed(() => subtotal.value >= freeShippingThreshold ? 0 : shippingRate);
+const shipping = computed(() => subtotal.value >= freeShippingThreshold.value ? 0 : shippingRate.value);
 const total = computed(() => subtotal.value + shipping.value);
 
+const auth = computed(() => page.props.auth?.user ?? null);
+const guestCheckoutEnabled = computed(() => page.props.guest_checkout_enabled !== false);
+
 const checkoutUrl = computed(() => {
+    if (!auth.value && !guestCheckoutEnabled.value) {
+        return route('login');
+    }
     return route('checkout');
 });
 

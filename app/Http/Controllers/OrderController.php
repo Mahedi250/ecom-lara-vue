@@ -47,8 +47,17 @@ class OrderController extends Controller
         return Auth::check() && Auth::user()->status === UserStatus::Banned;
     }
 
+    private function isGuestCheckoutEnabled(): bool
+    {
+        return filter_var(\App\Models\Setting::get('guest_checkout', '1'), FILTER_VALIDATE_BOOLEAN);
+    }
+
     public function checkout(): Response|RedirectResponse
     {
+        if (!Auth::check() && !$this->isGuestCheckoutEnabled()) {
+            return redirect()->route('login')->with('error', 'Please sign in to proceed to checkout.');
+        }
+
         if ($this->isBanned()) {
             return redirect()->route('home')->with('error', 'Your account has been suspended.');
         }
@@ -66,6 +75,10 @@ class OrderController extends Controller
 
     public function store(StoreOrderRequest $request): RedirectResponse
     {
+        if (!Auth::check() && !$this->isGuestCheckoutEnabled()) {
+            abort(403, 'Guest checkout is disabled.');
+        }
+
         if ($this->isBanned()) {
             abort(403, 'Your account has been suspended.');
         }
