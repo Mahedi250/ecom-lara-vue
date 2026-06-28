@@ -90,6 +90,16 @@ class ProductService
                 $this->syncVariants($product, $data['variants'], $variantImages);
             }
 
+            // Remove deleted images
+            if (!empty($data['remove_image_ids'])) {
+                $toDelete = $product->images()->whereIn('id', $data['remove_image_ids'])->get();
+                foreach ($toDelete as $img) {
+                    Storage::disk('public')->delete($img->path);
+                    $img->delete();
+                }
+            }
+            unset($data['remove_image_ids']);
+
             foreach ($images as $index => $image) {
                 $path = $image->store('products/images', 'public');
                 $product->images()->create([
@@ -97,6 +107,14 @@ class ProductService
                     'sort_order' => $product->images()->count() + $index,
                 ]);
             }
+
+            foreach ($data['existing_images'] ?? [] as $index => $path) {
+                $product->images()->create([
+                    'path' => $path,
+                    'sort_order' => $product->images()->count() + $index,
+                ]);
+            }
+            unset($data['existing_images']);
 
             return $product->fresh(['category', 'brand', 'images', 'attributeValues.attribute']);
         });
