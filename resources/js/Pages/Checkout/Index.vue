@@ -433,8 +433,9 @@ const subtotal = computed(() =>
     cartItems.value.reduce((sum, item) => sum + item.subtotal, 0)
 );
 
-const freeShippingThreshold = 2000;
-const shippingRate = 120;
+const shippingSettings = page.props.shipping_settings ?? { default_cost: 120, free_threshold: 2000 };
+const freeShippingThreshold = shippingSettings.free_threshold;
+const shippingRate = shippingSettings.default_cost;
 
 const shipping = computed(() => {
     form.shipping_cost = subtotal.value >= freeShippingThreshold ? 0 : shippingRate;

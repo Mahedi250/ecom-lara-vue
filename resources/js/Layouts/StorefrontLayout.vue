@@ -1,4 +1,8 @@
 <template>
+    <Head>
+        <title>{{ pageTitle }}</title>
+        <meta v-if="metaDescription" name="description" :content="metaDescription" />
+    </Head>
     <div class="min-h-screen flex flex-col bg-gray-50 overflow-x-hidden">
         <Navbar />
         <main class="flex-1 pb-20 md:pb-0">
@@ -34,15 +38,25 @@
 
 <script setup>
 import { computed } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import Navbar from '@/Components/Storefront/Navbar.vue';
 import Footer from '@/Components/Storefront/Footer.vue';
 import CartDrawer from '@/Components/Storefront/CartDrawer.vue';
 import { useCartDrawer } from '@/Composables/useCartDrawer';
 
+const props = defineProps({ title: String });
+
 const page = usePage();
 const cartCount = computed(() => page.props.cart_count ?? 0);
 const { toggle: toggleCart } = useCartDrawer();
+
+const siteSettings  = computed(() => page.props.site_settings ?? {});
+const storeName     = computed(() => siteSettings.value.store_name || 'Store');
+const metaDesc      = computed(() => siteSettings.value.meta_description || '');
+const metaSeoTitle  = computed(() => siteSettings.value.meta_title || '');
+
+const pageTitle     = computed(() => props.title ? `${props.title} — ${storeName.value}` : (metaSeoTitle.value || storeName.value));
+const metaDescription = computed(() => metaDesc.value);
 </script>
 
 <style scoped>

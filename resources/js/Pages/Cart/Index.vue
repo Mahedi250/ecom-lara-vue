@@ -336,8 +336,9 @@ const couponError = ref('');
 const couponSuccess = ref('');
 const toast = ref('');
 
-const freeShippingThreshold = 2000;
-const shippingRate = 120;
+const shippingSettings = page.props.shipping_settings ?? { default_cost: 120, free_threshold: 2000 };
+const freeShippingThreshold = shippingSettings.free_threshold;
+const shippingRate = shippingSettings.default_cost;
 
 const subtotal = computed(() => {
     if (!props.cart.items) return 0;
@@ -352,7 +353,15 @@ const shipping = computed(() => {
 
 const total = computed(() => subtotal.value - discount.value + shipping.value);
 
-const checkoutUrl = computed(() => route('checkout'));
+const auth = computed(() => page.props.auth?.user ?? null);
+const guestCheckoutEnabled = computed(() => page.props.guest_checkout_enabled !== false);
+
+const checkoutUrl = computed(() => {
+    if (!auth.value && !guestCheckoutEnabled.value) {
+        return route('login');
+    }
+    return route('checkout');
+});
 
 function formatPrice(val) {
     return Number(val).toLocaleString('en-BD');

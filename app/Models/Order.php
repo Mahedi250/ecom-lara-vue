@@ -41,7 +41,8 @@ class Order extends Model
 
     public static function generateOrderNumber(): string
     {
-        return 'ORD-' . strtoupper(uniqid());
+        $prefix = \App\Models\Setting::get('prefix', 'ORD-');
+        return $prefix . strtoupper(uniqid());
     }
 
     public function user(): BelongsTo
