@@ -12,36 +12,55 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             <!-- Recent Orders -->
-            <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-[0_2px_12px_0_rgba(0,0,0,0.06)] overflow-hidden">
                 <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                     <h2 class="font-semibold text-gray-900">Recent Orders</h2>
-                    <Link :href="route('admin.orders.index')" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">View all →</Link>
+                    <Link :href="route('admin.orders.index')" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition">View all →</Link>
                 </div>
                 <div v-if="recent_orders.length === 0" class="px-5 py-10 text-center text-gray-400 text-sm">No orders yet</div>
-                <div v-else class="divide-y divide-gray-50">
-                    <div v-for="order in recent_orders" :key="order.id" class="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50/50 transition">
-                        <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <div v-else class="divide-y divide-gray-100">
+                    <Link
+                        v-for="order in recent_orders"
+                        :key="order.id"
+                        :href="route('admin.orders.show', order.id)"
+                        class="relative flex items-center gap-3 pl-4 pr-4 sm:pr-5 py-3.5 hover:bg-indigo-50/40 transition group shadow-[0_1px_0_0_rgba(0,0,0,0.04)]"
+                    >
+                        <!-- Status colour bar on left edge -->
+                        <div class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full flex-shrink-0" :class="statusBarClass(order.status)"></div>
+
+                        <!-- Avatar -->
+                        <div class="w-9 h-9 bg-indigo-100 group-hover:bg-indigo-200 rounded-xl flex items-center justify-center flex-shrink-0 transition ml-2">
                             <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                             </svg>
                         </div>
+
+                        <!-- Left: order id + customer + status dot on mobile -->
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-800">{{ order.order_number }}</p>
-                            <p class="text-xs text-gray-500 truncate">{{ order.customer }}</p>
+                            <div class="flex items-center gap-1.5">
+                                <p class="text-sm font-semibold text-gray-800 truncate max-w-[100px] sm:max-w-[170px]">{{ order.order_number }}</p>
+                                <!-- Mobile status dot -->
+                                <span class="sm:hidden w-2 h-2 rounded-full flex-shrink-0" :class="statusDotClass(order.status)"></span>
+                            </div>
+                            <p class="text-xs text-gray-400 truncate mt-0.5">{{ order.customer }}</p>
                         </div>
-                        <div class="text-right flex-shrink-0">
-                            <p class="text-sm font-bold text-gray-900">৳{{ fmt(order.total) }}</p>
-                            <p class="text-xs text-gray-400">{{ order.created_at }}</p>
-                        </div>
-                        <span class="flex-shrink-0 text-xs font-semibold px-2 py-1 rounded-full" :class="statusClass(order.status)">
+
+                        <!-- Middle: status badge (sm+) -->
+                        <span class="hidden sm:inline-flex flex-shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full" :class="statusClass(order.status)">
                             {{ order.status_label }}
                         </span>
-                        <Link :href="route('admin.orders.show', order.id)" class="text-gray-400 hover:text-indigo-600 flex-shrink-0">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </Link>
-                    </div>
+
+                        <!-- Right: amount + date -->
+                        <div class="text-right flex-shrink-0 min-w-[70px]">
+                            <p class="text-sm font-bold text-gray-900">৳{{ fmt(order.total) }}</p>
+                            <p class="text-xs text-gray-400 mt-0.5">{{ order.created_at }}</p>
+                        </div>
+
+                        <!-- Arrow -->
+                        <svg class="w-4 h-4 text-gray-300 group-hover:text-indigo-500 flex-shrink-0 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </Link>
                 </div>
             </div>
 
@@ -111,14 +130,38 @@ function fmt(val) { return Number(val).toLocaleString('en-BD'); }
 
 function statusClass(status) {
     const map = {
-        pending: 'bg-yellow-100 text-yellow-700',
+        pending:    'bg-yellow-100 text-yellow-700',
         processing: 'bg-blue-100 text-blue-700',
-        shipped: 'bg-indigo-100 text-indigo-700',
-        delivered: 'bg-green-100 text-green-700',
-        cancelled: 'bg-red-100 text-red-700',
-        refunded: 'bg-gray-100 text-gray-600',
+        shipped:    'bg-indigo-100 text-indigo-700',
+        delivered:  'bg-green-100 text-green-700',
+        cancelled:  'bg-red-100 text-red-700',
+        refunded:   'bg-gray-100 text-gray-600',
     };
     return map[status] ?? 'bg-gray-100 text-gray-600';
+}
+
+function statusBarClass(status) {
+    const map = {
+        pending:    'bg-yellow-400',
+        processing: 'bg-blue-400',
+        shipped:    'bg-indigo-400',
+        delivered:  'bg-green-400',
+        cancelled:  'bg-red-400',
+        refunded:   'bg-gray-300',
+    };
+    return map[status] ?? 'bg-gray-300';
+}
+
+function statusDotClass(status) {
+    const map = {
+        pending:    'bg-yellow-400',
+        processing: 'bg-blue-400',
+        shipped:    'bg-indigo-400',
+        delivered:  'bg-green-400',
+        cancelled:  'bg-red-400',
+        refunded:   'bg-gray-300',
+    };
+    return map[status] ?? 'bg-gray-300';
 }
 
 const orderStatusSummary = computed(() => [

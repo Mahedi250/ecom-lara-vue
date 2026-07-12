@@ -12,6 +12,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductType;
 use App\Services\ProductService;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
 use Inertia\Inertia;
@@ -48,12 +49,17 @@ class ProductController extends Controller
 
     public function store(StoreProductRequest $request): RedirectResponse
     {
-        $product = $this->productService->create(
-            $request->except(['thumbnail', 'images']),
-            $request->file('thumbnail'),
-            $request->file('images', []),
-            $this->extractVariantImages($request)
-        );
+        try {
+            $product = $this->productService->create(
+                $request->except(['thumbnail', 'images']),
+                $request->file('thumbnail'),
+                $request->file('images', []),
+                $this->extractVariantImages($request)
+            );
+        } catch (UniqueConstraintViolationException) {
+            return back()->withInput()
+                ->with('error', 'A variant with that SKU already exists. Please use a unique SKU for each variant.');
+        }
 
         return redirect()->route('admin.products.show', $product)
             ->with('success', 'Product created successfully.');
@@ -83,13 +89,18 @@ class ProductController extends Controller
 
     public function update(UpdateProductRequest $request, Product $product): RedirectResponse
     {
-        $this->productService->update(
-            $product,
-            $request->except(['thumbnail', 'images']),
-            $request->file('thumbnail'),
-            $request->file('images', []),
-            $this->extractVariantImages($request)
-        );
+        try {
+            $this->productService->update(
+                $product,
+                $request->except(['thumbnail', 'images']),
+                $request->file('thumbnail'),
+                $request->file('images', []),
+                $this->extractVariantImages($request)
+            );
+        } catch (UniqueConstraintViolationException) {
+            return back()->withInput()
+                ->with('error', 'A variant with that SKU already exists. Please use a unique SKU for each variant.');
+        }
 
         return redirect()->route('admin.products.show', $product)
             ->with('success', 'Product updated successfully.');
@@ -112,5 +123,12 @@ class ProductController extends Controller
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product deleted successfully.');
+    }
+
+    public function toggleFeatured(Product $product): RedirectResponse
+    {
+        $product->update(['is_featured' => ! $product->is_featured]);
+
+        return back()->with('success', $product->is_featured ? 'Product marked as featured.' : 'Product removed from featured.');
     }
 }

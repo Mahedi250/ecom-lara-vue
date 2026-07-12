@@ -11,43 +11,43 @@
 
                     <!-- Social icons -->
                     <div class="flex items-center gap-3">
-                        <a href="#" aria-label="Facebook" class="hover:text-white transition">
+                        <a v-if="social.facebook" :href="social.facebook" target="_blank" rel="noopener" aria-label="Facebook" class="hover:text-white transition">
                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
                             </svg>
                         </a>
-                        <a href="#" aria-label="YouTube" class="hover:text-white transition">
+                        <a v-if="social.youtube" :href="social.youtube" target="_blank" rel="noopener" aria-label="YouTube" class="hover:text-white transition">
                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/>
                             </svg>
                         </a>
-                        <a href="#" aria-label="Instagram" class="hover:text-white transition">
+                        <a v-if="social.instagram" :href="social.instagram" target="_blank" rel="noopener" aria-label="Instagram" class="hover:text-white transition">
                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="2"/>
                                 <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
                                 <circle cx="17.5" cy="6.5" r="1" fill="currentColor"/>
                             </svg>
                         </a>
-                        <a href="#" aria-label="TikTok" class="hover:text-white transition">
+                        <a v-if="social.twitter" :href="social.twitter" target="_blank" rel="noopener" aria-label="Twitter / X" class="hover:text-white transition">
                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/>
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.213 5.567zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                             </svg>
                         </a>
                     </div>
 
                     <!-- Contact + Track -->
                     <div class="flex items-center gap-4">
-                        <a href="tel:09678664664" class="flex items-center gap-1.5 hover:text-white transition">
+                        <a v-if="storePhone" :href="`tel:${storePhone}`" class="flex items-center gap-1.5 hover:text-white transition">
                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24 11.47 11.47 0 003.59.57 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.25.2 2.45.57 3.57a1 1 0 01-.25 1.02l-2.2 2.2z"/>
                             </svg>
-                            09678-664664
+                            {{ storePhone }}
                         </a>
-                        <a href="mailto:support@nityogadget.com" class="flex items-center gap-1.5 hover:text-white transition">
+                        <a v-if="storeEmail" :href="`mailto:${storeEmail}`" class="flex items-center gap-1.5 hover:text-white transition">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                             </svg>
-                            support@nityogadget.com
+                            {{ storeEmail }}
                         </a>
                         <span class="w-px h-4 bg-gray-700"></span>
                         <Link :href="route('products.index')" class="hover:text-white transition font-medium">Track Order</Link>
@@ -223,7 +223,7 @@
                 </button>
 
                 <!-- Call icon -->
-                <a href="tel:09678664664" class="w-10 h-10 flex items-center justify-center text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-xl transition flex-shrink-0">
+                <a :href="storePhone ? `tel:${storePhone}` : '#'" class="w-10 h-10 flex items-center justify-center text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-xl transition flex-shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                     </svg>
@@ -338,11 +338,11 @@
 
                 <!-- Drawer footer -->
                 <div class="px-4 py-4 border-t border-gray-100 flex-shrink-0 space-y-2">
-                    <a href="tel:09678664664" class="flex items-center gap-3 text-sm text-gray-600 hover:text-green-600 py-2">
+                    <a v-if="storePhone" :href="`tel:${storePhone}`" class="flex items-center gap-3 text-sm text-gray-600 hover:text-green-600 py-2">
                         <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                         </svg>
-                        09678-664664
+                        {{ storePhone }}
                     </a>
                     <Link v-if="auth.user" :href="route('logout')" method="post" as="button"
                         class="w-full text-center text-sm text-red-500 border border-red-200 py-2 rounded-lg hover:bg-red-50 transition">
@@ -424,6 +424,11 @@ const auth = computed(() => page.props.auth);
 const cartCount = computed(() => page.props.cart_count ?? 0);
 const categories = computed(() => page.props.nav_categories ?? []);
 const siteSettings = computed(() => page.props.site_settings ?? {});
+
+const siteSettings = computed(() => page.props.site_settings ?? {});
+const social       = computed(() => siteSettings.value.social ?? {});
+const storePhone   = computed(() => siteSettings.value.store_phone ?? '');
+const storeEmail   = computed(() => siteSettings.value.store_email ?? '');
 
 const drawerOpen = ref(false);
 const megaOpen = ref(false);

@@ -171,13 +171,19 @@ const defaultValues = {
 
 const values = reactive({ ...defaultValues });
 
-// Populate from backend settings grouped by group
+// Keys that must be boolean for checkbox v-model
+const booleanKeys = new Set(
+    Object.keys(defaultValues).filter(k => typeof defaultValues[k] === 'boolean')
+);
+
 if (props.settings) {
     Object.entries(props.settings).forEach(([group, items]) => {
         (Array.isArray(items) ? items : Object.values(items)).forEach(s => {
             const key = `${s.group ?? group}.${s.key}`;
             if (key in values) {
-                values[key] = s.value;
+                values[key] = booleanKeys.has(key)
+                    ? (s.value === '1' || s.value === 1 || s.value === true)
+                    : s.value;
             }
         });
     });

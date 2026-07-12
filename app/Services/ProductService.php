@@ -54,6 +54,15 @@ class ProductService
                 ]);
             }
 
+            foreach ($data['existing_images'] ?? [] as $index => $path) {
+                $product->images()->create([
+                    'path' => $path,
+                    'is_primary' => empty($images) && $index === 0,
+                    'sort_order' => count($images) + $index,
+                ]);
+            }
+            unset($data['existing_images']);
+
             return $product->load(['category', 'brand', 'images', 'attributeValues.attribute']);
         });
     }
@@ -77,9 +86,20 @@ class ProductService
                 $this->syncAttributes($product, $data['attributes']);
             }
 
-            if (isset($data['variants'])) {
-                $this->syncVariants($product, $data['variants'], $variantImages);
+            if (isset($data['_variants_sent'])) {
+                $this->syncVariants($product, $data['variants'] ?? [], $variantImages);
             }
+            unset($data['_variants_sent']);
+
+            // Remove deleted images
+            if (!empty($data['remove_image_ids'])) {
+                $toDelete = $product->images()->whereIn('id', $data['remove_image_ids'])->get();
+                foreach ($toDelete as $img) {
+                    Storage::disk('public')->delete($img->path);
+                    $img->delete();
+                }
+            }
+            unset($data['remove_image_ids']);
 
             foreach ($images as $index => $image) {
                 $path = $image->store('products/images', 'public');
@@ -88,6 +108,14 @@ class ProductService
                     'sort_order' => $product->images()->count() + $index,
                 ]);
             }
+
+            foreach ($data['existing_images'] ?? [] as $index => $path) {
+                $product->images()->create([
+                    'path' => $path,
+                    'sort_order' => $product->images()->count() + $index,
+                ]);
+            }
+            unset($data['existing_images']);
 
             return $product->fresh(['category', 'brand', 'images', 'attributeValues.attribute']);
         });
@@ -110,7 +138,10 @@ class ProductService
 
             if (isset($variantImages[$index]) && $variantImages[$index] instanceof UploadedFile) {
                 $data['image'] = $variantImages[$index]->store('products/variants', 'public');
+            } elseif (!empty($row['existing_image'])) {
+                $data['image'] = $row['existing_image'];
             }
+            unset($data['existing_image']);
 
             if ($id && $variant = $product->variants()->find((int) $id)) {
                 $variant->update($data);
@@ -118,13 +149,16 @@ class ProductService
                 $variant = $product->variants()->create($data);
             }
 
-            $variant->attributeValues()->delete();
-            foreach ($attrs as $attrId => $valueId) {
-                if ($valueId) {
-                    $variant->attributeValues()->create([
-                        'attribute_id'       => (int) $attrId,
-                        'attribute_value_id' => (int) $valueId,
-                    ]);
+            // Only sync attribute values when the request explicitly includes them
+            if (array_key_exists('attributes', $row)) {
+                $variant->attributeValues()->delete();
+                foreach ($attrs as $attrId => $valueId) {
+                    if ((int) $attrId > 0 && (int) $valueId > 0) {
+                        $variant->attributeValues()->create([
+                            'attribute_id'       => (int) $attrId,
+                            'attribute_value_id' => (int) $valueId,
+                        ]);
+                    }
                 }
             }
         }
