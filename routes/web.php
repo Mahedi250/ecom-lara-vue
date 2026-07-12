@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -12,6 +14,10 @@ Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('h
 
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
+
+Route::get('/brands', [BrandController::class, 'index'])->name('brands.index');
+
+Route::get('/page/{page:slug}', [PageController::class, 'show'])->name('page.show');
 
 // Cart (guest + auth)
 Route::middleware('web')->group(function () {

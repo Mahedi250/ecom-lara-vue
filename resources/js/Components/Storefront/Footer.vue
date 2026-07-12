@@ -5,13 +5,9 @@
                 <!-- Brand -->
                 <div class="md:col-span-1">
                     <div class="flex items-center gap-2 mb-4">
-                        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                            </svg>
-                        </div>
-                        <span class="text-white text-xl font-bold">নিত্য গ্যাজেট</span>
+                        <img v-if="siteSettings.logo_url" :src="siteSettings.logo_url" alt="Site logo"
+                            class="h-9 w-auto max-w-[140px] object-contain"/>
+                        <div v-else class="h-9 w-28 rounded-md bg-white/10 animate-pulse"></div>
                     </div>
                     <p class="text-sm leading-relaxed">Your trusted gadget store in Bangladesh. Quality products, fast delivery.</p>
                     <div class="flex gap-3 mt-4">
@@ -41,7 +37,9 @@
                     <h3 class="text-white font-semibold mb-4">Customer Service</h3>
                     <ul class="space-y-2 text-sm">
                         <li><Link v-if="auth.user" :href="route('orders.index')" class="hover:text-white transition">My Orders</Link></li>
-                        <li><a href="#" class="hover:text-white transition">Return Policy</a></li>
+                        <li v-for="p in publishedPages" :key="p.slug">
+                            <Link :href="route('page.show', p.slug)" class="hover:text-white transition">{{ p.title }}</Link>
+                        </li>
                         <li><a href="#" class="hover:text-white transition">Shipping Info</a></li>
                         <li><a href="#" class="hover:text-white transition">FAQ</a></li>
                         <li><a href="#" class="hover:text-white transition">Track Order</a></li>
@@ -89,6 +87,9 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 const auth = usePage().props.auth;
+const siteSettings = computed(() => usePage().props.site_settings ?? {});
+const publishedPages = computed(() => usePage().props.published_pages ?? []);
 </script>

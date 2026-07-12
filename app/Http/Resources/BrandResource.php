@@ -18,6 +18,7 @@ class BrandResource extends JsonResource
             'description' => $this->description,
             'website' => $this->website,
             'is_active' => $this->is_active,
+            'products_count' => $this->whenCounted('products'),
         ];
     }
 }

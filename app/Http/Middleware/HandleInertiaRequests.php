@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Category;
+use App\Models\Page;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
@@ -59,6 +60,9 @@ class HandleInertiaRequests extends Middleware
                 ];
             }),
             'notification_sound' => fn() => (bool) \App\Models\Setting::get('notification.sound_enabled', true),
+            'published_pages' => fn() => Cache::remember('published_pages_shared', 3600, fn() =>
+                Page::published()->orderBy('title')->get(['title', 'slug'])->toArray()
+            ),
             'cart_count' => function () use ($request) {
                 if ($request->user()) {
                     return \App\Models\Cart::where('user_id', $request->user()->id)
