@@ -13,13 +13,14 @@
         >
             <!-- Logo -->
             <div class="flex items-center gap-3 px-5 h-16 border-b border-white/10 flex-shrink-0">
-                <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <img v-if="siteSettings?.logo_url" :src="siteSettings.logo_url" alt="" class="w-full h-full object-cover" />
+                    <svg v-else class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                     </svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-white font-bold text-sm leading-none">নিত্য গ্যাজেট</p>
+                    <p class="text-white font-bold text-sm leading-none">{{ siteSettings?.store_name || 'নিত্য গ্যাজেট' }}</p>
                     <p class="text-slate-400 text-xs mt-0.5">Admin Panel</p>
                 </div>
                 <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white p-1">
@@ -222,6 +223,7 @@ const auth = computed(() => page.props.auth?.user);
 const flashDismissed = ref(false);
 const flash = computed(() => flashDismissed.value ? null : page.props.flash);
 const stats = computed(() => page.props.admin_stats ?? null);
+const siteSettings = computed(() => page.props.site_settings ?? null);
 const sidebarOpen = ref(false);
 const toasts = ref([]);
 let toastSeq = 0;
