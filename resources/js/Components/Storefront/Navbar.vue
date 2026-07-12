@@ -424,8 +424,6 @@ const auth = computed(() => page.props.auth);
 const cartCount = computed(() => page.props.cart_count ?? 0);
 const categories = computed(() => page.props.nav_categories ?? []);
 const siteSettings = computed(() => page.props.site_settings ?? {});
-
-const siteSettings = computed(() => page.props.site_settings ?? {});
 const social       = computed(() => siteSettings.value.social ?? {});
 const storePhone   = computed(() => siteSettings.value.store_phone ?? '');
 const storeEmail   = computed(() => siteSettings.value.store_email ?? '');
