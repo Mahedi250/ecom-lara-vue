@@ -11,8 +11,17 @@
             class="fixed inset-y-0 left-0 w-64 bg-slate-900 z-30 flex flex-col transition-transform duration-300"
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
         >
-            <!-- Header -->
-            <div class="flex items-center justify-end px-5 h-16 border-b border-white/10 flex-shrink-0">
+            <!-- Logo -->
+            <div class="flex items-center gap-3 px-5 h-16 border-b border-white/10 flex-shrink-0">
+                <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <img v-if="siteSettings?.logo_url" :src="siteSettings.logo_url" alt="" class="w-full h-full object-cover" />
+                    <svg v-else class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-slate-400 text-xs">Admin Panel</p>
+                </div>
                 <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white p-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -103,17 +112,6 @@
                 </div>
 
             </nav>
-
-            <!-- Logo -->
-            <div class="flex flex-col items-center justify-center gap-2 py-4 border-t border-white/10 flex-shrink-0">
-                <div class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center overflow-hidden">
-                    <img v-if="siteSettings?.logo_url" :src="siteSettings.logo_url" alt="" class="w-full h-full object-cover" />
-                    <svg v-else class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                    </svg>
-                </div>
-                <p class="text-slate-400 text-xs">Admin Panel</p>
-            </div>
 
             <!-- User footer -->
             <div class="border-t border-white/10 p-4 flex-shrink-0">
