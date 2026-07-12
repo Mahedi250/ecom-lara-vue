@@ -17,7 +17,7 @@ class DashboardController extends Controller
             'stats' => [
                 'total_products' => Product::count(),
                 'total_orders'   => Order::count(),
-                'total_users'    => User::count(),
+                'total_users'    => User::whereDoesntHave('roles', fn ($q) => $q->whereIn('name', ['admin', 'staff']))->count(),
                 'total_revenue'  => (float) Order::where('status', '!=', 'cancelled')->sum('total'),
                 'pending_orders' => Order::where('status', 'pending')->count(),
                 'today_orders'   => Order::whereDate('created_at', today())->count(),

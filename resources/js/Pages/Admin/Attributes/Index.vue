@@ -2,11 +2,11 @@
     <AdminLayout title="Attributes" subtitle="Manage product attribute types and values">
         <template #header-actions>
             <button @click="showNewAttr = true"
-                class="text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-xl transition flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 sm:px-4 py-2 rounded-xl transition flex items-center gap-2">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                New Attribute
+                <span class="hidden sm:inline">New Attribute</span>
             </button>
         </template>
 

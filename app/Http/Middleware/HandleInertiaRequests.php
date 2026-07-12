@@ -54,15 +54,31 @@ class HandleInertiaRequests extends Middleware
                 $icon    = \App\Models\Setting::get('site_icon');
                 $favicon = \App\Models\Setting::get('favicon');
                 return [
-                    'logo_url'    => $logo    ? \Illuminate\Support\Facades\Storage::disk('public')->url($logo)    : null,
-                    'icon_url'    => $icon    ? \Illuminate\Support\Facades\Storage::disk('public')->url($icon)    : null,
-                    'favicon_url' => $favicon ? \Illuminate\Support\Facades\Storage::disk('public')->url($favicon) : null,
+                    'logo_url'        => $logo    ? \Illuminate\Support\Facades\Storage::disk('public')->url($logo)    : null,
+                    'icon_url'        => $icon    ? \Illuminate\Support\Facades\Storage::disk('public')->url($icon)    : null,
+                    'favicon_url'     => $favicon ? \Illuminate\Support\Facades\Storage::disk('public')->url($favicon) : null,
+                    'store_name'      => \App\Models\Setting::get('store_name', config('app.name')),
+                    'store_email'     => \App\Models\Setting::get('store_email'),
+                    'store_phone'     => \App\Models\Setting::get('store_phone'),
+                    'store_address'   => \App\Models\Setting::get('store_address'),
+                    'currency_symbol' => \App\Models\Setting::get('currency_symbol', '৳'),
+                    'meta_title'      => \App\Models\Setting::get('meta_title'),
+                    'meta_description'=> \App\Models\Setting::get('meta_description'),
+                    'ga_id'           => \App\Models\Setting::get('ga_id'),
+                    'social' => [
+                        'facebook'  => \App\Models\Setting::get('facebook'),
+                        'instagram' => \App\Models\Setting::get('instagram'),
+                        'twitter'   => \App\Models\Setting::get('twitter'),
+                        'youtube'   => \App\Models\Setting::get('youtube'),
+                    ],
                 ];
             }),
-            'notification_sound' => fn() => (bool) \App\Models\Setting::get('notification.sound_enabled', true),
-            'published_pages' => fn() => Cache::remember('published_pages_shared', 3600, fn() =>
-                Page::published()->orderBy('title')->get(['title', 'slug'])->toArray()
-            ),
+            'notification_sound' => fn() => (bool) \App\Models\Setting::get('sound_enabled', true),
+            'guest_checkout_enabled' => fn() => filter_var(\App\Models\Setting::get('guest_checkout', '1'), FILTER_VALIDATE_BOOLEAN),
+            'shipping_settings' => fn() => [
+                'default_cost'    => (float) \App\Models\Setting::get('default_cost', 120),
+                'free_threshold'  => (float) \App\Models\Setting::get('free_threshold', 2000),
+            ],
             'cart_count' => function () use ($request) {
                 if ($request->user()) {
                     return \App\Models\Cart::where('user_id', $request->user()->id)

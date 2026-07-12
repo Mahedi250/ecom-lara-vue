@@ -21,6 +21,7 @@ Route::middleware(['auth', 'role:admin|staff'])
         Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
         Route::resource('products', Admin\ProductController::class);
+        Route::patch('products/{product}/toggle-featured', [Admin\ProductController::class, 'toggleFeatured'])->name('products.toggle-featured');
         Route::resource('categories', Admin\CategoryController::class)->except('show');
         Route::resource('brands', Admin\BrandController::class)->except('show');
         Route::get('media', [Admin\MediaController::class, 'index'])->name('media.index');

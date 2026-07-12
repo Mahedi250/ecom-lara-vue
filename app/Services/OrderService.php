@@ -49,7 +49,18 @@ class OrderService
                 'notes' => $data['notes'] ?? null,
             ]);
 
+            // Eager-load variant attributes for snapshot
+            $cart->load('items.variant.attributeValues.attribute', 'items.variant.attributeValues.attributeValue');
+
             foreach ($cart->items as $item) {
+                $variantAttrs = null;
+                if ($item->variant) {
+                    $variantAttrs = $item->variant->attributeValues->map(fn($av) => [
+                        'attribute' => $av->attribute->name,
+                        'value'     => $av->attributeValue->label ?? $av->attributeValue->value,
+                    ])->values()->all();
+                }
+
                 $order->items()->create([
                     'product_id' => $item->product_id,
                     'product_variant_id' => $item->product_variant_id,
@@ -58,6 +69,7 @@ class OrderService
                     'quantity' => $item->quantity,
                     'unit_price' => $item->price,
                     'total_price' => $item->price * $item->quantity,
+                    'options' => $variantAttrs ? ['attributes' => $variantAttrs] : null,
                 ]);
 
                 if ($item->product->manage_stock) {
