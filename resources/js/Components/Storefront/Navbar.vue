@@ -451,14 +451,6 @@ function isRoute(name) {
     try { return page.url === route(name) || page.url.startsWith(route(name)); } catch { return false; }
 }
 
-async function toggleSearch() {
-    searchOpen.value = !searchOpen.value;
-    if (searchOpen.value) {
-        await nextTick();
-        mobileSearchInput.value?.focus();
-    }
-}
-
 function search() {
     if (!searchQuery.value.trim()) return;
     router.get(route('products.index'), { search: searchQuery.value });
