@@ -28,6 +28,7 @@ Route::middleware(['auth', 'role:admin|staff'])
         Route::post('media', [Admin\MediaController::class, 'store'])->name('media.store');
         Route::delete('media/{medium}', [Admin\MediaController::class, 'destroy'])->name('media.destroy');
         Route::resource('coupons', Admin\CouponController::class)->except('show');
+        Route::resource('pages', Admin\PageController::class)->except('show');
 
         Route::get('attributes', [Admin\AttributeController::class, 'index'])->name('attributes.index');
         Route::post('attributes', [Admin\AttributeController::class, 'store'])->name('attributes.store');

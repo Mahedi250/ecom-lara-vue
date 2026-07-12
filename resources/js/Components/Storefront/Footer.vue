@@ -47,7 +47,9 @@
                     <h3 class="text-white font-semibold mb-4">Customer Service</h3>
                     <ul class="space-y-2 text-sm">
                         <li><Link v-if="auth.user" :href="route('orders.index')" class="hover:text-white transition">My Orders</Link></li>
-                        <li><a href="#" class="hover:text-white transition">Return Policy</a></li>
+                        <li v-for="p in publishedPages" :key="p.slug">
+                            <Link :href="route('page.show', p.slug)" class="hover:text-white transition">{{ p.title }}</Link>
+                        </li>
                         <li><a href="#" class="hover:text-white transition">Shipping Info</a></li>
                         <li><a href="#" class="hover:text-white transition">FAQ</a></li>
                         <li><a href="#" class="hover:text-white transition">Track Order</a></li>

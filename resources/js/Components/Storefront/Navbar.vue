@@ -67,19 +67,13 @@
 
             <!-- Main nav -->
             <div class="border-b border-gray-200 shadow-sm">
-                <div class="max-w-7xl mx-auto px-6 lg:px-8 flex items-center gap-4 h-[70px]">
+                <div class="max-w-7xl mx-auto px-6 lg:px-8 flex items-center gap-4 h-20">
 
                     <!-- Logo -->
                     <Link :href="route('home')" class="flex items-center gap-2 flex-shrink-0 mr-2">
-                        <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                            </svg>
-                        </div>
-                        <div class="leading-none">
-                            <p class="text-xl font-extrabold text-gray-900 tracking-tight">নিত্য গ্যাজেট</p>
-                            <p class="text-[10px] text-indigo-500 font-medium tracking-wide">Best Gadgets Always</p>
-                        </div>
+                        <img v-if="siteSettings.logo_url" :src="siteSettings.logo_url" alt="Site logo"
+                            class="h-16 w-auto max-w-[220px] object-contain"/>
+                        <div v-else class="h-16 w-[160px] rounded-md bg-gray-100 animate-pulse"></div>
                     </Link>
 
                     <!-- Search bar -->
@@ -174,10 +168,6 @@
                                 :class="isRoute('home') ? 'text-indigo-600 bg-indigo-50' : ''">
                                 HOME
                             </Link>
-                            <Link :href="route('products.index')"
-                                class="flex items-center px-4 text-[13px] font-semibold text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition whitespace-nowrap border-r border-gray-100">
-                                SHOP
-                            </Link>
                             <Link :href="route('products.index', { sort_by: 'sold_count', sort_dir: 'desc' })"
                                 class="flex items-center px-4 text-[13px] font-semibold text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition whitespace-nowrap border-r border-gray-100">
                                 BEST SELLING
@@ -186,7 +176,7 @@
                                 class="flex items-center px-4 text-[13px] font-semibold text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition whitespace-nowrap border-r border-gray-100">
                                 NEW ARRIVALS
                             </Link>
-                            <Link :href="route('products.index')"
+                            <Link :href="route('brands.index')"
                                 class="flex items-center px-4 text-[13px] font-semibold text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition whitespace-nowrap border-r border-gray-100">
                                 BRANDS
                             </Link>
@@ -219,13 +209,10 @@
                 </button>
 
                 <!-- Logo -->
-                <Link :href="route('home')" class="flex-1 flex justify-center items-center gap-2">
-                    <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                        </svg>
-                    </div>
-                    <span class="text-lg font-extrabold text-gray-900">নিত্য গ্যাজেট</span>
+                <Link :href="route('home')" class="flex-1 flex justify-center items-center gap-2 min-w-0">
+                    <img v-if="siteSettings.logo_url" :src="siteSettings.logo_url" alt="Site logo"
+                        class="h-8 w-auto max-w-[120px] object-contain"/>
+                    <div v-else class="h-8 w-24 rounded-md bg-gray-100 animate-pulse"></div>
                 </Link>
 
                 <!-- Search icon -->
@@ -272,7 +259,7 @@
                     BEST SELLING
                 </Link>
                 <div class="w-px bg-gray-200"></div>
-                <Link :href="route('products.index')" class="flex-shrink-0 flex items-center justify-center px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition whitespace-nowrap">
+                <Link :href="route('brands.index')" class="flex-shrink-0 flex items-center justify-center px-3 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition whitespace-nowrap">
                     BRANDS
                 </Link>
             </div>
@@ -289,12 +276,9 @@
                 <!-- Drawer header -->
                 <div class="flex items-center justify-between px-4 h-14 bg-gray-900 flex-shrink-0">
                     <div class="flex items-center gap-2">
-                        <div class="w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center">
-                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                            </svg>
-                        </div>
-                        <span class="text-white font-bold">নিত্য গ্যাজেট</span>
+                        <img v-if="siteSettings.logo_url" :src="siteSettings.logo_url" alt="Site logo"
+                            class="h-7 w-auto max-w-[110px] object-contain"/>
+                        <div v-else class="h-7 w-20 rounded-md bg-white/10 animate-pulse"></div>
                     </div>
                     <button @click="drawerOpen = false" class="text-white/80 hover:text-white p-1">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -324,10 +308,9 @@
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest py-2">Navigation</p>
                     <div class="space-y-0.5">
                         <Link :href="route('home')" @click="drawerOpen = false" class="flex items-center justify-between px-3 py-2.5 text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">HOME</Link>
-                        <Link :href="route('products.index')" @click="drawerOpen = false" class="flex items-center justify-between px-3 py-2.5 text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">SHOP</Link>
                         <Link :href="route('products.index', { sort_by: 'sold_count', sort_dir: 'desc' })" @click="drawerOpen = false" class="flex items-center justify-between px-3 py-2.5 text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">BEST SELLING</Link>
                         <Link :href="route('products.index', { sort_by: 'created_at', sort_dir: 'desc' })" @click="drawerOpen = false" class="flex items-center justify-between px-3 py-2.5 text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">NEW ARRIVALS</Link>
-                        <Link :href="route('products.index')" @click="drawerOpen = false" class="flex items-center justify-between px-3 py-2.5 text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">BRANDS</Link>
+                        <Link :href="route('brands.index')" @click="drawerOpen = false" class="flex items-center justify-between px-3 py-2.5 text-sm font-semibold text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition">BRANDS</Link>
                         <Link :href="route('products.index', { featured: 1 })" @click="drawerOpen = false" class="flex items-center justify-between px-3 py-2.5 text-sm font-bold text-orange-500 hover:bg-orange-50 rounded-lg transition">🔥 HOT OFFER</Link>
                     </div>
                 </div>
@@ -440,6 +423,7 @@ const page = usePage();
 const auth = computed(() => page.props.auth);
 const cartCount = computed(() => page.props.cart_count ?? 0);
 const categories = computed(() => page.props.nav_categories ?? []);
+const siteSettings = computed(() => page.props.site_settings ?? {});
 
 const siteSettings = computed(() => page.props.site_settings ?? {});
 const social       = computed(() => siteSettings.value.social ?? {});
