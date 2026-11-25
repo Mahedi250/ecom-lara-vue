@@ -20,6 +20,7 @@ class SettingSeeder extends Seeder
             ['group' => 'seo', 'key' => 'meta_description', 'value' => 'Shop the best products at NityoGadget.', 'label' => 'Meta Description'],
             ['group' => 'shipping', 'key' => 'flat_rate', 'value' => '80', 'label' => 'Flat Rate Shipping'],
             ['group' => 'shipping', 'key' => 'free_shipping_threshold', 'value' => '500', 'label' => 'Free Shipping Threshold'],
+            ['group' => 'order', 'key' => 'whatsapp_number', 'value' => '', 'label' => 'WhatsApp Order Number'],
             ['group' => 'social', 'key' => 'facebook', 'value' => '', 'label' => 'Facebook'],
             ['group' => 'social', 'key' => 'instagram', 'value' => '', 'label' => 'Instagram'],
         ];

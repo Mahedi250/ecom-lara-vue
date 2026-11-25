@@ -61,6 +61,7 @@ class HandleInertiaRequests extends Middleware
                     'store_email'     => \App\Models\Setting::get('store_email'),
                     'store_phone'     => \App\Models\Setting::get('store_phone'),
                     'store_address'   => \App\Models\Setting::get('store_address'),
+                    'whatsapp_number' => \App\Models\Setting::get('whatsapp_number'),
                     'currency_symbol' => \App\Models\Setting::get('currency_symbol', '৳'),
                     'meta_title'      => \App\Models\Setting::get('meta_title'),
                     'meta_description'=> \App\Models\Setting::get('meta_description'),

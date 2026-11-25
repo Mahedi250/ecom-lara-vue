@@ -32,7 +32,17 @@ class OrderService
                 $discount = $coupon->calculateDiscount($subtotal);
             }
 
-            $shippingCost = $data['shipping_cost'] ?? 0;
+            $paymentMethod = $data['payment_method'] ?? 'cod';
+
+            // Shipping is free for shop pickup, otherwise apply the configured rate/threshold.
+            $shippingCost = 0;
+            if ($paymentMethod !== 'pickup') {
+                $freeThreshold = (float) \App\Models\Setting::get('free_threshold', 2000);
+                $shippingCost = $subtotal >= $freeThreshold
+                    ? 0
+                    : (float) \App\Models\Setting::get('default_cost', 120);
+            }
+
             $tax = $data['tax'] ?? 0;
             $total = $subtotal - $discount + $shippingCost + $tax;
 
@@ -86,6 +96,15 @@ class OrderService
                 $this->createAddress($order, $data['billing_address'], 'billing');
             }
 
+            // Persist the selected payment method without altering the schema.
+            $order->payments()->create([
+                'user_id' => Auth::id(),
+                'gateway' => $paymentMethod,
+                'status' => 'pending',
+                'amount' => $total,
+                'currency' => 'BDT',
+            ]);
+
             if ($coupon) {
                 $coupon->increment('used_count');
                 if (Auth::id()) {
@@ -112,6 +131,9 @@ class OrderService
 
     private function createAddress(Order $order, array $data, string $type): void
     {
+        $data['city'] = $data['city'] ?? 'N/A';
+        $data['country'] = $data['country'] ?? 'BD';
+
         $order->addresses()->create(array_merge($data, ['type' => $type]));
     }
 }

@@ -39,8 +39,8 @@ class HomeController extends Controller
             ]);
 
         $brands = Brand::active()
+            ->whereHas('products')
             ->withCount('products')
-            ->having('products_count', '>', 0)
             ->orderByDesc('products_count')
             ->get(['id', 'name', 'slug', 'logo'])
             ->map(fn ($b) => [

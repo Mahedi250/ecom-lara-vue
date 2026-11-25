@@ -84,6 +84,7 @@
                     <div class="text-sm space-y-2">
                         <div class="flex justify-between"><span class="text-gray-500">Order #</span><span class="font-medium text-gray-800">{{ order.order_number }}</span></div>
                         <div class="flex justify-between"><span class="text-gray-500">Payment</span><span class="font-medium text-gray-800">{{ order.payment_status_label }}</span></div>
+                        <div v-if="order.payment_method" class="flex justify-between"><span class="text-gray-500">Method</span><span class="font-medium text-gray-800">{{ paymentMethodLabel(order.payment_method) }}</span></div>
                         <div class="flex justify-between"><span class="text-gray-500">Date</span><span class="font-medium text-gray-800 text-xs">{{ fmtDate(order.created_at) }}</span></div>
                         <div v-if="order.coupon_code" class="flex justify-between"><span class="text-gray-500">Coupon</span><span class="font-medium text-indigo-600">{{ order.coupon_code }}</span></div>
                     </div>
@@ -131,6 +132,10 @@ const newStatus = ref(props.order.status);
 const updating = ref(false);
 
 function fmt(v) { return Number(v).toLocaleString('en-BD'); }
+function paymentMethodLabel(m) {
+    const map = { cod: 'Cash on Delivery', pickup: 'Collect from Shop', online: 'Online Payment' };
+    return map[m] ?? m;
+}
 function fmtDate(d) { return d ? new Date(d).toLocaleString('en-BD', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''; }
 function statusClass(s) {
     const m = { pending: 'bg-amber-100 text-amber-700', processing: 'bg-blue-100 text-blue-700', shipped: 'bg-violet-100 text-violet-700', delivered: 'bg-green-100 text-green-700', cancelled: 'bg-red-100 text-red-700', refunded: 'bg-gray-100 text-gray-600' };

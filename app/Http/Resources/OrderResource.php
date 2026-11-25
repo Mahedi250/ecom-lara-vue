@@ -17,6 +17,7 @@ class OrderResource extends JsonResource
             'status_color' => $this->status->color(),
             'payment_status' => $this->payment_status->value,
             'payment_status_label' => $this->payment_status->label(),
+            'payment_method' => $this->whenLoaded('payments', fn() => $this->payments->last()?->gateway),
             'subtotal' => (float) $this->subtotal,
             'discount' => (float) $this->discount,
             'shipping_cost' => (float) $this->shipping_cost,

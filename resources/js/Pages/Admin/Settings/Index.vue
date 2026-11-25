@@ -58,6 +58,11 @@
                                 <label class="label">Order Number Prefix</label>
                                 <input v-model="values['order.prefix']" type="text" placeholder="ORD-" class="input" />
                             </div>
+                            <div>
+                                <label class="label">WhatsApp Order Number</label>
+                                <input v-model="values['order.whatsapp_number']" type="tel" placeholder="+8801700000000" class="input" />
+                                <p class="text-xs text-gray-400 mt-1">Shown as an "Order on WhatsApp" button on product pages. Include the country code, e.g. +8801700000000. Leave empty to hide the button.</p>
+                            </div>
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input v-model="values['order.guest_checkout']" type="checkbox" class="w-4 h-4 text-indigo-600 rounded" />
                                 <span class="text-sm text-gray-700 font-medium">Allow Guest Checkout</span>
@@ -164,6 +169,7 @@ const defaultValues = {
     'general.store_address': '', 'general.currency_symbol': '৳', 'general.maintenance_mode': false,
     'shipping.default_cost': '', 'shipping.free_threshold': '',
     'order.prefix': 'ORD-', 'order.guest_checkout': true, 'order.email_notifications': true,
+    'order.whatsapp_number': '',
     'notification.sound_enabled': true,
     'seo.meta_title': '', 'seo.meta_description': '', 'seo.ga_id': '',
     'social.facebook': '', 'social.instagram': '', 'social.twitter': '', 'social.youtube': '',
