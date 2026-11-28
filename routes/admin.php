@@ -22,11 +22,13 @@ Route::middleware(['auth', 'admin.panel'])
         Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
         // ── Catalog: Products ──
-        Route::middleware('role_or_permission:admin|products.view')->group(function () {
-            Route::resource('products', Admin\ProductController::class)->only(['index', 'show']);
-        });
+        // NOTE: create/store must be registered before show (products/{product})
+        // or /admin/products/create would be captured by the show route.
         Route::middleware('role_or_permission:admin|products.create')->group(function () {
             Route::resource('products', Admin\ProductController::class)->only(['create', 'store']);
+        });
+        Route::middleware('role_or_permission:admin|products.view')->group(function () {
+            Route::resource('products', Admin\ProductController::class)->only(['index', 'show']);
         });
         Route::middleware('role_or_permission:admin|products.edit')->group(function () {
             Route::resource('products', Admin\ProductController::class)->only(['edit', 'update']);

@@ -72,6 +72,11 @@ class PermissionEnforcementTest extends TestCase
         $this->actingAs($admin)->get('/admin/settings')->assertOk();
         $this->actingAs($admin)->get('/admin/users')->assertOk();
         $this->actingAs($admin)->get('/admin/coupons/create')->assertOk();
+        // Regression: products/create must not be captured by products/{product}
+        $this->actingAs($admin)->get('/admin/products/create')->assertOk();
+        $this->actingAs($admin)->get('/admin/categories/create')->assertOk();
+        $this->actingAs($admin)->get('/admin/brands/create')->assertOk();
+        $this->actingAs($admin)->get('/admin/pages/create')->assertOk();
     }
 
     public function test_orders_status_update_requires_orders_edit_permission(): void
