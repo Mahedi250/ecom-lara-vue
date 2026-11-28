@@ -19,9 +19,12 @@ class PostDeploy extends Command
     {
         $this->info('Running post-deployment tasks...');
 
+        // Clear caches FIRST so the config (e.g. config/admin-menu.php) is
+        // fresh — a stale cached config would hide new menu permissions.
+        $this->call('optimize:clear');
+
         $this->call('migrate', ['--force' => true]);
         $this->call('db:seed', ['--class' => 'RolePermissionSeeder', '--force' => true]);
-        $this->call('optimize:clear');
         $this->call('queue:restart');
 
         if ($this->option('optimize')) {
