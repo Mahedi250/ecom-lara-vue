@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\EnsurePanelAccess;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class AdminLoginController extends Controller
     {
         $request->authenticate();
 
-        if (! $request->user()->hasAnyRole(['admin', 'staff'])) {
+        if (! EnsurePanelAccess::allows($request->user())) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

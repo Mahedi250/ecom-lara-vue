@@ -46,6 +46,13 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn() => $request->session()->get('success'),
                 'error' => fn() => $request->session()->get('error'),
             ],
+            'admin_menu' => fn() => $request->user()
+                ? \App\Support\AdminMenu::forUser($request->user())
+                : [],
+            'user_permissions' => fn() => $request->user()
+                ? $request->user()->getAllPermissions()->pluck('name')->all()
+                : [],
+            'can_manage_roles' => fn() => (bool) $request->user()?->hasRole('admin'),
             'nav_categories' => fn() => Cache::remember('nav_categories', 3600, fn() =>
                 Category::active()->root()->get(['id', 'name'])->toArray()
             ),

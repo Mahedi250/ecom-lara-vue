@@ -1,7 +1,7 @@
 <template>
     <AdminLayout title="Users" subtitle="Manage registered users">
 
-        <!-- Filters -->
+        <!-- Filters + actions -->
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-5 flex flex-col sm:flex-row gap-3">
             <input v-model="filters.search" type="text" placeholder="Search name or email..." class="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" @keyup.enter="applyFilters" />
             <select v-model="filters.role" class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white">
@@ -10,6 +10,10 @@
             </select>
             <button @click="applyFilters" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2 rounded-xl transition">Filter</button>
             <button v-if="hasFilters" @click="clearFilters" class="text-gray-500 border border-gray-200 px-3 py-2 rounded-xl text-sm transition">Clear</button>
+            <Link v-if="can('users.create')" :href="route('admin.users.create')" class="sm:ml-auto inline-flex items-center justify-center gap-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Add User
+            </Link>
         </div>
 
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -61,7 +65,7 @@
                             <td class="px-4 py-3.5 text-right">
                                 <div class="flex items-center gap-2 justify-end">
                                     <Link :href="route('admin.users.show', u.id)" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium border border-indigo-200 px-2.5 py-1 rounded-lg transition">View</Link>
-                                    <button @click="confirmDelete(u)" class="text-xs text-red-500 hover:text-red-700 font-medium border border-red-200 px-2.5 py-1 rounded-lg transition">Delete</button>
+                                    <button v-if="can('users.delete')" @click="confirmDelete(u)" class="text-xs text-red-500 hover:text-red-700 font-medium border border-red-200 px-2.5 py-1 rounded-lg transition">Delete</button>
                                 </div>
                             </td>
                         </tr>
@@ -98,8 +102,11 @@
 import { ref, reactive, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { useCan } from '@/Composables/useCan';
 
 const props = defineProps({ users: Object, roles: Array });
+
+const { can } = useCan();
 const deleteTarget = ref(null);
 const filters = reactive({ search: '', role: '' });
 const hasFilters = computed(() => filters.search || filters.role);

@@ -1,0 +1,1 @@
+import{d as r,K as t}from"./app-ClfXsQaH.js";function i(){const s=t(),e=r(()=>s.props.user_permissions??[]),n=r(()=>(s.props.auth?.user?.roles??[]).includes("admin"));function o(u){return u?n.value||e.value.includes(u):!0}return{can:o,permissions:e,isAdmin:n}}export{i as u};

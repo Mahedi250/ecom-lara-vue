@@ -2,33 +2,26 @@
 
 namespace Database\Seeders;
 
+use App\Support\AdminMenu;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $permissions = [
-            'products.view', 'products.create', 'products.edit', 'products.delete',
-            'categories.view', 'categories.create', 'categories.edit', 'categories.delete',
-            'brands.view', 'brands.create', 'brands.edit', 'brands.delete',
-            'orders.view', 'orders.edit', 'orders.delete',
-            'users.view', 'users.create', 'users.edit', 'users.delete',
-            'coupons.view', 'coupons.create', 'coupons.edit', 'coupons.delete',
-            'settings.view', 'settings.edit',
-            'reports.view',
-        ];
+        // Sync permissions from the admin menu registry — new menu items
+        // automatically get their permissions created here.
+        AdminMenu::syncToDatabase();
 
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
-        }
+        $allPermissions = Permission::whereIn('name', AdminMenu::permissions())->get();
 
         $admin = Role::firstOrCreate(['name' => 'admin']);
-        $admin->syncPermissions($permissions);
+        $admin->syncPermissions($allPermissions);
 
         $staff = Role::firstOrCreate(['name' => 'staff']);
         $staff->syncPermissions([
@@ -37,6 +30,7 @@ class RolePermissionSeeder extends Seeder
             'brands.view', 'brands.create', 'brands.edit',
             'orders.view', 'orders.edit',
             'users.view',
+            'media.view', 'media.create',
         ]);
 
         Role::firstOrCreate(['name' => 'customer']);

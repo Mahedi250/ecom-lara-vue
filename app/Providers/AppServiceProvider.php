@@ -35,6 +35,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Events
 
+        // Super admin bypasses every authorization check.
+        Gate::before(fn (User $user) => $user->hasRole('admin') ? true : null);
+
         // Admin gate
         Gate::define('admin', fn(User $user) => $user->hasRole('admin'));
         Gate::define('staff', fn(User $user) => $user->hasRole(['admin', 'staff']));

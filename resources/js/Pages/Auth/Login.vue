@@ -110,9 +110,9 @@
                 </div>
 
                 <form @submit.prevent="submit" class="space-y-5">
-                    <!-- Email -->
+                    <!-- Email or phone -->
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Email or Phone</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,11 +122,11 @@
                             <input
                                 id="email"
                                 v-model="form.email"
-                                type="email"
+                                type="text"
                                 autocomplete="username"
                                 required
                                 autofocus
-                                placeholder="you@example.com"
+                                placeholder="you@example.com or 01XXXXXXXXX"
                                 class="block w-full pl-10 pr-4 py-2.5 text-sm border rounded-lg transition focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                 :class="form.errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'"
                             />

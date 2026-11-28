@@ -1,7 +1,7 @@
 <template>
     <AdminLayout title="Media Library" subtitle="Manage uploaded files">
         <template #header-actions>
-            <button @click="$refs.uploadInput.click()"
+            <button v-if="can('media.create')" @click="$refs.uploadInput.click()"
                 class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
@@ -23,7 +23,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
             </svg>
             <p class="text-sm text-gray-500 mb-1">Drag & drop images here or
-                <button @click="$refs.uploadInput.click()" class="text-indigo-600 font-semibold hover:underline">browse</button>
+                <button v-if="can('media.create')" @click="$refs.uploadInput.click()" class="text-indigo-600 font-semibold hover:underline">browse</button>
             </p>
             <p class="text-xs text-gray-400">PNG, JPG, WebP, SVG — max 4MB each</p>
 
@@ -56,7 +56,7 @@
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
                 <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition"></div>
                 <button
-                    @click.stop="confirmDelete(item)"
+                    v-if="can('media.delete')" @click.stop="confirmDelete(item)"
                     class="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full text-xs items-center justify-center hidden group-hover:flex shadow transition hover:bg-red-600"
                 >✕</button>
             </div>
@@ -98,7 +98,7 @@
                                 class="flex-1 border border-gray-200 text-gray-600 text-sm py-2 rounded-xl hover:bg-gray-50 transition">
                                 Close
                             </button>
-                            <button @click="confirmDelete(preview); preview = null"
+                            <button v-if="can('media.delete')" @click="confirmDelete(preview); preview = null"
                                 class="flex-1 bg-red-50 text-red-600 text-sm py-2 rounded-xl hover:bg-red-100 transition font-semibold">
                                 Delete
                             </button>
@@ -128,9 +128,12 @@
 import { ref, computed } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { useCan } from '@/Composables/useCan';
 import axios from 'axios';
 
 const props = defineProps({ media: Object });
+
+const { can } = useCan();
 
 const dragging = ref(false);
 const uploading = ref([]);

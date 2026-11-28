@@ -214,9 +214,37 @@
                             </div>
 
                             <div class="border-t border-gray-100 pt-4 space-y-2 text-sm">
+                                <!-- Coupon -->
+                                <div class="pb-1">
+                                    <div class="flex gap-2">
+                                        <input
+                                            v-model="couponCode"
+                                            type="text"
+                                            placeholder="Coupon code"
+                                            class="flex-1 min-w-0 border rounded-lg px-3 py-2 text-xs uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                                            :class="couponError ? 'border-red-400 bg-red-50' : 'border-gray-200'"
+                                            @input="couponError = ''"
+                                        />
+                                        <button
+                                            @click="applyCoupon"
+                                            :disabled="applying || !couponCode.trim()"
+                                            class="text-xs bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-gray-700 font-semibold px-3.5 py-2 rounded-lg transition"
+                                        >{{ applying ? '...' : 'Apply' }}</button>
+                                    </div>
+                                    <p v-if="couponMessage" class="text-[11px] text-green-600 font-medium mt-1.5">
+                                        ✓ {{ couponMessage }} — you save ৳{{ formatPrice(discount) }}
+                                    </p>
+                                    <p v-else-if="couponError" class="text-[11px] text-red-500 mt-1.5">{{ couponError }}</p>
+                                    <p v-if="err('coupon_code')" class="text-[11px] text-red-500 mt-1.5">{{ err('coupon_code') }}</p>
+                                </div>
+
                                 <div class="flex justify-between text-gray-500">
                                     <span>Subtotal</span>
                                     <span class="font-medium text-gray-800">৳{{ formatPrice(subtotal) }}</span>
+                                </div>
+                                <div v-if="discount > 0" class="flex justify-between text-green-600">
+                                    <span>Coupon ({{ couponApplied }})</span>
+                                    <span class="font-medium">-৳{{ formatPrice(discount) }}</span>
                                 </div>
                                 <div class="flex justify-between text-gray-500">
                                     <span>Shipping</span>
@@ -281,7 +309,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
 import StorefrontLayout from '@/Layouts/StorefrontLayout.vue';
 
@@ -317,7 +345,38 @@ const shipping = computed(() => {
     return subtotal.value >= freeShippingThreshold ? 0 : shippingRate;
 });
 
-const total = computed(() => subtotal.value + shipping.value);
+const total = computed(() => Math.max(0, subtotal.value - discount.value + shipping.value));
+
+// Coupon
+const couponCode = ref('');
+const couponApplied = ref(null);
+const discount = ref(0);
+const couponMessage = ref('');
+const couponError = ref('');
+const applying = ref(false);
+
+async function applyCoupon() {
+    const code = couponCode.value.trim();
+    if (!code) return;
+    applying.value = true;
+    couponError.value = '';
+    couponMessage.value = '';
+    try {
+        const { data } = await window.axios.post(route('api.coupons.validate'), {
+            code,
+            order_total: subtotal.value,
+        });
+        discount.value = Number(data.discount);
+        couponApplied.value = data.coupon.code;
+        couponMessage.value = data.coupon.name ? `"${data.coupon.name}" applied` : 'Coupon applied';
+    } catch (e) {
+        discount.value = 0;
+        couponApplied.value = null;
+        couponError.value = e.response?.data?.message ?? 'Coupon could not be applied.';
+    } finally {
+        applying.value = false;
+    }
+}
 
 function err(key) {
     return form.errors[key] || form.errors[`shipping_address.${key}`] || '';
@@ -327,7 +386,12 @@ function formatPrice(val) {
     return Number(val).toLocaleString('en-BD');
 }
 
-function placeOrder() {
+async function placeOrder() {
+    // Auto-apply a typed-but-not-applied coupon so the shown total matches the server.
+    const code = couponCode.value.trim();
+    if (code && couponApplied.value !== code) {
+        await applyCoupon();
+    }
     form.transform((data) => ({
         shipping_address: {
             name: data.name,
@@ -337,6 +401,7 @@ function placeOrder() {
             country: 'BD',
         },
         payment_method: data.payment_method,
+        coupon_code: couponApplied.value,
         notes: data.notes || null,
         shipping_cost: shipping.value,
         tax: 0,

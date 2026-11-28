@@ -12,7 +12,8 @@ class OrderConfirmationNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        // Phone-only users have no email address — database channel only.
+        return $notifiable->email ? ['mail', 'database'] : ['database'];
     }
 
     public function toMail(object $notifiable): MailMessage

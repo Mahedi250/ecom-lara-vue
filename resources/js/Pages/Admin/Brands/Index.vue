@@ -1,7 +1,7 @@
 <template>
     <AdminLayout title="Brands" subtitle="Manage product brands">
         <template #header-actions>
-            <Link :href="route('admin.brands.create')" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-3 sm:px-4 py-2 rounded-xl transition">
+            <Link v-if="can('brands.create')" :href="route('admin.brands.create')" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-3 sm:px-4 py-2 rounded-xl transition">
                 <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 <span class="hidden sm:inline">Add Brand</span>
             </Link>
@@ -48,8 +48,8 @@
                             </td>
                             <td class="px-4 py-3.5 text-right">
                                 <div class="flex items-center gap-2 justify-end">
-                                    <Link :href="route('admin.brands.edit', b.id)" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium border border-indigo-200 px-2.5 py-1 rounded-lg transition">Edit</Link>
-                                    <button @click="confirmDelete(b)" class="text-xs text-red-500 hover:text-red-700 font-medium border border-red-200 px-2.5 py-1 rounded-lg transition">Delete</button>
+                                    <Link v-if="can('brands.edit')" :href="route('admin.brands.edit', b.id)" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium border border-indigo-200 px-2.5 py-1 rounded-lg transition">Edit</Link>
+                                    <button v-if="can('brands.delete')" @click="confirmDelete(b)" class="text-xs text-red-500 hover:text-red-700 font-medium border border-red-200 px-2.5 py-1 rounded-lg transition">Delete</button>
                                 </div>
                             </td>
                         </tr>
@@ -85,8 +85,11 @@
 import { ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { useCan } from '@/Composables/useCan';
 
 const props = defineProps({ brands: Object });
+
+const { can } = useCan();
 const deleteTarget = ref(null);
 function confirmDelete(b) { deleteTarget.value = b; }
 function doDelete() { router.delete(route('admin.brands.destroy', deleteTarget.value.id), { onSuccess: () => { deleteTarget.value = null; } }); }

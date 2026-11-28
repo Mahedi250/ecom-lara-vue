@@ -104,27 +104,27 @@
                         <p v-if="form.errors.name" class="mt-1.5 text-xs text-red-600">{{ form.errors.name }}</p>
                     </div>
 
-                    <!-- Email -->
+                    <!-- Phone -->
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+                        <label for="phone" class="block text-sm font-medium text-gray-700 mb-1.5">Phone number</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                                 </svg>
                             </div>
                             <input
-                                id="email"
-                                v-model="form.email"
-                                type="email"
-                                autocomplete="username"
+                                id="phone"
+                                v-model="form.phone"
+                                type="tel"
+                                autocomplete="tel"
                                 required
-                                placeholder="you@example.com"
+                                placeholder="01XXXXXXXXX"
                                 class="block w-full pl-10 pr-4 py-2.5 text-sm border rounded-lg transition focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                :class="form.errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'"
+                                :class="form.errors.phone ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'"
                             />
                         </div>
-                        <p v-if="form.errors.email" class="mt-1.5 text-xs text-red-600">{{ form.errors.email }}</p>
+                        <p v-if="form.errors.phone" class="mt-1.5 text-xs text-red-600">{{ form.errors.phone }}</p>
                     </div>
 
                     <!-- Password -->
@@ -217,7 +217,7 @@ const showPassword = ref(false);
 
 const form = useForm({
     name: '',
-    email: '',
+    phone: '',
     password: '',
     password_confirmation: '',
 });

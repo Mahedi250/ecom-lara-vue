@@ -120,14 +120,14 @@
                             <td class="px-5 py-3.5">
                                 <div class="flex items-center justify-end gap-1.5">
                                     <!-- Ban / Unban -->
-                                    <button v-if="c.status !== 'banned'" @click="ban(c)"
+                                    <button v-if="c.status !== 'banned' && can('customers.edit')" @click="ban(c)"
                                         class="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                                         </svg>
                                         Ban
                                     </button>
-                                    <button v-else @click="unban(c)"
+                                    <button v-else-if="can('customers.edit')" @click="unban(c)"
                                         class="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -135,7 +135,7 @@
                                         Unban
                                     </button>
                                     <!-- Delete -->
-                                    <button @click="destroy(c)"
+                                    <button v-if="can('customers.delete')" @click="destroy(c)"
                                         class="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-600 transition">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -230,8 +230,11 @@
 import { ref, reactive, computed } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { useCan } from '@/Composables/useCan';
 
 const props = defineProps({ customers: Object, filters: Object, stats: Object });
+
+const { can } = useCan();
 const page = usePage();
 const errors = computed(() => page.props.errors ?? {});
 

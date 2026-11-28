@@ -29,13 +29,14 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
 
     /**
      * Attempt to authenticate the request's credentials.
+     * The identifier may be an email address or a phone number.
      *
      * @throws ValidationException
      */
@@ -43,7 +44,7 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        if (! $this->attemptCredentials()) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -62,6 +63,46 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+    }
+
+    /**
+     * Try every plausible credential form for the given identifier.
+     */
+    private function attemptCredentials(): bool
+    {
+        $password = $this->string('password');
+        $identifier = trim($this->string('email'));
+        $remember = $this->boolean('remember');
+
+        if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+            return Auth::attempt(['email' => $identifier, 'password' => $password], $remember);
+        }
+
+        $digits = preg_replace('/\D/', '', $identifier);
+
+        foreach ($this->phoneCandidates($digits) as $candidate) {
+            if (Auth::attempt(['phone' => $candidate, 'password' => $password], $remember)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * A stored 8801XXXXXXXXX can be typed as 01XXXXXXXXX and vice versa.
+     */
+    private function phoneCandidates(string $digits): array
+    {
+        $candidates = [$digits];
+
+        if (strlen($digits) === 13 && str_starts_with($digits, '880')) {
+            $candidates[] = '0'.substr($digits, 3);
+        } elseif (strlen($digits) === 11 && str_starts_with($digits, '0')) {
+            $candidates[] = '880'.substr($digits, 1);
+        }
+
+        return array_unique($candidates);
     }
 
     /**

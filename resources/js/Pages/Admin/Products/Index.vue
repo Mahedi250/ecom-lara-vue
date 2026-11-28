@@ -1,7 +1,7 @@
 <template>
     <AdminLayout title="Products" subtitle="Manage your product catalog">
         <template #header-actions>
-            <Link :href="route('admin.products.create')" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-3 sm:px-4 py-2 rounded-xl transition">
+            <Link v-if="can('products.create')" :href="route('admin.products.create')" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-3 sm:px-4 py-2 rounded-xl transition">
                 <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 <span class="hidden sm:inline">Add Product</span>
             </Link>
@@ -62,6 +62,7 @@
                     <div class="flex items-center gap-2">
                         <span class="text-xs text-gray-500">Featured</span>
                         <button
+                            v-if="can('products.edit')"
                             @click="toggleFeatured(p)"
                             :disabled="togglingId === p.id"
                             :title="p.is_featured ? 'Remove from featured' : 'Mark as featured'"
@@ -75,8 +76,8 @@
                         </button>
                     </div>
                     <div class="flex items-center gap-2">
-                        <Link :href="route('admin.products.edit', p.id)" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium border border-indigo-200 px-3 py-1.5 rounded-lg transition">Edit</Link>
-                        <button @click="confirmDelete(p)" class="text-xs text-red-500 hover:text-red-700 font-medium border border-red-200 px-3 py-1.5 rounded-lg transition">Delete</button>
+                        <Link v-if="can('products.edit')" :href="route('admin.products.edit', p.id)" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium border border-indigo-200 px-3 py-1.5 rounded-lg transition">Edit</Link>
+                        <button v-if="can('products.delete')" @click="confirmDelete(p)" class="text-xs text-red-500 hover:text-red-700 font-medium border border-red-200 px-3 py-1.5 rounded-lg transition">Delete</button>
                     </div>
                 </div>
             </div>
@@ -149,8 +150,8 @@
                             </td>
                             <td class="px-4 py-3.5 text-right">
                                 <div class="flex items-center gap-2 justify-end">
-                                    <Link :href="route('admin.products.edit', p.id)" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium border border-indigo-200 px-2.5 py-1 rounded-lg transition">Edit</Link>
-                                    <button @click="confirmDelete(p)" class="text-xs text-red-500 hover:text-red-700 font-medium border border-red-200 px-2.5 py-1 rounded-lg transition">Delete</button>
+                                    <Link v-if="can('products.edit')" :href="route('admin.products.edit', p.id)" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium border border-indigo-200 px-2.5 py-1 rounded-lg transition">Edit</Link>
+                                    <button v-if="can('products.delete')" @click="confirmDelete(p)" class="text-xs text-red-500 hover:text-red-700 font-medium border border-red-200 px-2.5 py-1 rounded-lg transition">Delete</button>
                                 </div>
                             </td>
                         </tr>
@@ -213,11 +214,14 @@
 import { ref, computed, reactive } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { useCan } from '@/Composables/useCan';
 
 const props = defineProps({
     products: Object,
     filters: Object,
 });
+
+const { can } = useCan();
 
 const page = usePage();
 const filters = reactive({ search: props.filters?.search ?? '', category_id: props.filters?.category_id ?? '', status: props.filters?.status ?? '' });

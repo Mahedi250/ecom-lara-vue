@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Coupon;
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreOrderRequest extends FormRequest
 {
@@ -14,7 +17,19 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'coupon_code' => ['nullable', 'string'],
+            'coupon_code' => ['nullable', 'string', function (string $attribute, mixed $value, Closure $fail) {
+                $coupon = Coupon::active()->where('code', $value)->first();
+
+                if (!$coupon) {
+                    $fail('The coupon code is invalid or has expired.');
+                    return;
+                }
+
+                if (Auth::check() && $coupon->usage_limit_per_user
+                    && $coupon->usages()->where('user_id', Auth::id())->count() >= $coupon->usage_limit_per_user) {
+                    $fail('You have already used this coupon.');
+                }
+            }],
             'notes' => ['nullable', 'string', 'max:500'],
             'payment_method' => ['required', 'string', 'in:cod,pickup,online'],
             'shipping_address' => ['required', 'array'],

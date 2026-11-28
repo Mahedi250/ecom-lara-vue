@@ -27,17 +27,38 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'admin.panel' => \App\Http\Middleware\EnsurePanelAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(fn ($request) => $request->expectsJson());
 
-        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, \Illuminate\Http\Request $request) {
-            if (!$request->expectsJson()) {
-                return \Inertia\Inertia::render('Error', ['status' => $e->getStatusCode()])
-                    ->toResponse($request)
-                    ->setStatusCode($e->getStatusCode());
+        $exceptions->render(function (\Throwable $e, \Illuminate\Http\Request $request) {
+            $status = $e instanceof \Symfony\Component\HttpKernel\Exception\HttpException
+                ? $e->getStatusCode()
+                : ($e instanceof \Illuminate\Auth\Access\AuthorizationException ? 403 : null);
+
+            // Permission-denied inside the admin panel: bounce back with a
+            // flash popup instead of a hard error page. Visitors without ANY
+            // panel access are sent to the storefront; panel users are sent
+            // back to the page they came from (fallback: dashboard).
+            if ($status === 403 && $request->user() && $request->is('admin*')) {
+                if (!\App\Http\Middleware\EnsurePanelAccess::allows($request->user())) {
+                    return redirect()->to('/')->with('error', 'You are not authorized.');
+                }
+
+                return redirect()
+                    ->back(302, [], route('admin.dashboard'))
+                    ->with('error', 'You are not authorized to access that page.');
             }
+
+            if (!$request->expectsJson() && $status !== null) {
+                return \Inertia\Inertia::render('Error', ['status' => $status])
+                    ->toResponse($request)
+                    ->setStatusCode($status);
+            }
+
+            return null;
         });
 
         $exceptions->respond(function (\Illuminate\Http\Response|\Symfony\Component\HttpFoundation\Response $response, \Throwable $e, \Illuminate\Http\Request $request) {

@@ -63,7 +63,7 @@
             <div class="space-y-5">
 
                 <!-- Update Status -->
-                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                <div v-if="can('orders.edit')" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                     <h2 class="font-semibold text-gray-900 mb-4">Update Status</h2>
                     <div class="mb-4">
                         <span class="text-sm font-semibold px-3 py-1.5 rounded-full" :class="statusClass(order.status)">
@@ -126,8 +126,10 @@
 import { ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { useCan } from '@/Composables/useCan';
 
 const props = defineProps({ order: Object, statuses: Array });
+const { can } = useCan();
 const newStatus = ref(props.order.status);
 const updating = ref(false);
 

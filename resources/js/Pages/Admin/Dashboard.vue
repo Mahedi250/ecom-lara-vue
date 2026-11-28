@@ -12,7 +12,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             <!-- Recent Orders -->
-            <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-[0_2px_12px_0_rgba(0,0,0,0.06)] overflow-hidden">
+            <div v-if="can('orders.view')" class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-[0_2px_12px_0_rgba(0,0,0,0.06)] overflow-hidden">
                 <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                     <h2 class="font-semibold text-gray-900">Recent Orders</h2>
                     <Link :href="route('admin.orders.index')" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition">View all →</Link>
@@ -68,22 +68,22 @@
             <div class="space-y-4">
 
                 <!-- Quick Actions -->
-                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                <div v-if="can('products.create') || can('orders.view') || can('categories.create') || can('coupons.create')" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                     <h2 class="font-semibold text-gray-900 mb-4">Quick Actions</h2>
                     <div class="grid grid-cols-2 gap-2">
-                        <Link :href="route('admin.products.create')" class="flex flex-col items-center gap-2 p-3 bg-indigo-50 hover:bg-indigo-100 rounded-xl text-indigo-700 transition text-xs font-medium text-center">
+                        <Link v-if="can('products.create')" :href="route('admin.products.create')" class="flex flex-col items-center gap-2 p-3 bg-indigo-50 hover:bg-indigo-100 rounded-xl text-indigo-700 transition text-xs font-medium text-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             Add Product
                         </Link>
-                        <Link :href="route('admin.orders.index')" class="flex flex-col items-center gap-2 p-3 bg-blue-50 hover:bg-blue-100 rounded-xl text-blue-700 transition text-xs font-medium text-center">
+                        <Link v-if="can('orders.view')" :href="route('admin.orders.index')" class="flex flex-col items-center gap-2 p-3 bg-blue-50 hover:bg-blue-100 rounded-xl text-blue-700 transition text-xs font-medium text-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                             View Orders
                         </Link>
-                        <Link :href="route('admin.categories.create')" class="flex flex-col items-center gap-2 p-3 bg-violet-50 hover:bg-violet-100 rounded-xl text-violet-700 transition text-xs font-medium text-center">
+                        <Link v-if="can('categories.create')" :href="route('admin.categories.create')" class="flex flex-col items-center gap-2 p-3 bg-violet-50 hover:bg-violet-100 rounded-xl text-violet-700 transition text-xs font-medium text-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7a2 2 0 012-2h4l2 2h6a2 2 0 012 2v1H3V7zm0 4h18v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6z"/></svg>
                             Add Category
                         </Link>
-                        <Link :href="route('admin.coupons.create')" class="flex flex-col items-center gap-2 p-3 bg-amber-50 hover:bg-amber-100 rounded-xl text-amber-700 transition text-xs font-medium text-center">
+                        <Link v-if="can('coupons.create')" :href="route('admin.coupons.create')" class="flex flex-col items-center gap-2 p-3 bg-amber-50 hover:bg-amber-100 rounded-xl text-amber-700 transition text-xs font-medium text-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
                             Add Coupon
                         </Link>
@@ -120,11 +120,14 @@
 import { computed, defineComponent, h } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { useCan } from '@/Composables/useCan';
 
 const props = defineProps({
     stats: Object,
     recent_orders: { type: Array, default: () => [] },
 });
+
+const { can } = useCan();
 
 function fmt(val) { return Number(val).toLocaleString('en-BD'); }
 

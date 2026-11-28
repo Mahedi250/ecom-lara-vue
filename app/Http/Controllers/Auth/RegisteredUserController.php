@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Auth\Events\Registered;
+use App\Rules\UniquePhone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,21 +31,28 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Phone-only registration: name + phone + password. Phone is normalized
+        // to digits (e.g. "+880 1700-123456" -> "8801700123456") and must be
+        // unique — it is the login identifier. No OTP, no email required.
+        $request->merge([
+            'phone' => $request->filled('phone')
+                ? preg_replace('/\D/', '', $request->input('phone'))
+                : $request->input('phone'),
+        ]);
+
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'phone' => ['required', 'string', 'max:20', new UniquePhone],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
             'name' => $request->name,
-            'email' => $request->email,
+            'phone' => $request->phone,
             'password' => Hash::make($request->password),
         ]);
 
         $user->assignRole('customer');
-
-        event(new Registered($user));
 
         Auth::login($user);
 

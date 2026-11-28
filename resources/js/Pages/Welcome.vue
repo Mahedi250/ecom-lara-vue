@@ -50,7 +50,7 @@
                     <div class="w-1 h-7 bg-indigo-600 rounded-full"></div>
                     <h2 class="text-xl font-bold text-gray-900">Shop by Category</h2>
                 </div>
-                <Link :href="route('products.index')" class="text-sm text-indigo-600 font-medium hover:underline">See all →</Link>
+                <Link :href="route('categories.index')" class="text-sm text-indigo-600 font-medium hover:underline">See all →</Link>
             </div>
 
             <div class="bg-white rounded-2xl p-3 sm:p-4">
@@ -77,11 +77,6 @@
                         </div>
                     </Link>
                 </div>
-            </div>
-
-            <!-- Mobile view all -->
-            <div class="sm:hidden text-center mt-4">
-                <Link :href="route('products.index')" class="text-sm text-gray-500 font-medium hover:text-red-500 transition">View All ↓</Link>
             </div>
         </section>
 
@@ -110,7 +105,7 @@
                     <!-- Mobile header -->
                     <div class="flex md:hidden items-center justify-between mb-3">
                         <h2 class="text-sm font-extrabold text-white">This Week's Must-Have</h2>
-                        <Link :href="route('products.index', { featured: 1 })" class="text-xs text-indigo-300 hover:text-white transition">View All →</Link>
+                        <Link :href="route('products.index', { featured: 1 })" class="text-xs text-indigo-300 hover:text-white transition">See all →</Link>
                     </div>
 
                     <div class="overflow-hidden" ref="trendingTrack">
@@ -288,6 +283,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import StorefrontLayout from '@/Layouts/StorefrontLayout.vue';
 import ProductCard from '@/Components/Storefront/ProductCard.vue';
+import { categoryEmojis } from '@/Constants/categoryEmojis';
 
 const props = defineProps({
     featuredProducts: Object,
@@ -356,13 +352,6 @@ const catPalette = [
     'linear-gradient(135deg,#f0f9ff,#c8e8ff)',
     'linear-gradient(135deg,#fffff0,#ffffc0)',
 ];
-
-const categoryEmojis = {
-    'Electronics': '📱', 'Phone': '📱', 'Smartphone': '📱', 'Smart Phone': '📱', 'Tablet': '📟', 'Laptop': '💻',
-    'Desktop': '🖥️', 'Mac': '🍎', 'Accessories': '🎧', 'Sound': '🔊',
-    'Smart Watch': '⌚', 'Gaming': '🎮', 'Fashion': '👗', 'Books': '📚',
-    'Home & Living': '🏠', 'Sports': '⚽', 'Power': '🔋', 'Camera': '📷',
-};
 
 function nextSlide() { currentSlide.value = (currentSlide.value + 1) % slides.value.length; }
 function prevSlide() { currentSlide.value = (currentSlide.value - 1 + slides.value.length) % slides.value.length; }

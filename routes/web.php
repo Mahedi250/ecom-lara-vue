@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
@@ -16,6 +17,8 @@ Route::get('/products', [ProductController::class, 'index'])->name('products.ind
 Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
 
 Route::get('/brands', [BrandController::class, 'index'])->name('brands.index');
+
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
 Route::get('/page/{page:slug}', [PageController::class, 'show'])->name('page.show');
 
